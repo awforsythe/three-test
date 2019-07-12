@@ -15,6 +15,10 @@ module.exports = {
         use: ['babel-loader'],
       },
       {
+        test: /\.glsl$/,
+        loader: 'webpack-glsl-loader',
+      },
+      {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },

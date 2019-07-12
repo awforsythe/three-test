@@ -1,10 +1,15 @@
 import * as THREE from 'three';
 
+import skyVertex from './shaders/skyVertex.glsl';
+import skyFragment from './shaders/skyFragment.glsl';
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000.0);
+// Camera
+const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1.0, 8000.0);
+camera.position.set(500, 0, 250);
 
 // Scene
 const scene = new THREE.Scene();
@@ -52,8 +57,6 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 // Sky
-const vertexShader = document.getElementById('vertexShader').textContent;
-const fragmentShader = document.getElementById('fragmentShader').textContent;
 let uniforms = {
   "topColor": { value: new THREE.Color( 0x0077ff ) },
   "bottomColor": { value: new THREE.Color( 0xffffff ) },
@@ -65,60 +68,64 @@ scene.fog.color.copy(uniforms[ "bottomColor" ].value);
 const skyGeo = new THREE.SphereBufferGeometry(4000, 32, 15);
 const skyMat = new THREE.ShaderMaterial({
   uniforms: uniforms,
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
+  vertexShader: skyVertex,
+  fragmentShader: skyFragment,
   side: THREE.BackSide
 });
-var sky = new THREE.Mesh(skyGeo, skyMat);
+const sky = new THREE.Mesh(skyGeo, skyMat);
 scene.add(sky);
 
-const renderer = new THREE.WebGLRenderer();
+
+// Model
+const geometry = new THREE.BoxGeometry(10, 10, 10);
+const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+cube.castShadow = true;
+cube.receiveShadow = true;
+scene.add(cube);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+renderer.gammaInput = true;
+renderer.gammaOutput = true;
+renderer.shadowMap.enabled = true;
+
+// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-let draggable = [];
-draggable.push(cube);
-console.log(draggable);
-
+const draggable = [cube];
 const drag = new DragControls(draggable, camera, renderer.domElement);
 drag.addEventListener('dragstart', () => controls.enabled = false);
 drag.addEventListener('dragend', () => controls.enabled = true);
 
-/*
-const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-const geometry = new THREE.Geometry();
-geometry.vertices.push(new THREE.Vector3(-1, 0, 0));
-geometry.vertices.push(new THREE.Vector3(0, 1, 0));
-geometry.vertices.push(new THREE.Vector3(1, 0, 0));
-const line = new THREE.Line(geometry, material);
-scene.add(line);
-*/
-
-
-
-
-camera.position.z = 5.0;
 controls.update()
 
-/*
 const loader = new GLTFLoader();
-loader.load('/models/pony/scene.gltf', (gltf) => {
-  scene.add(gltf.scene);
+loader.load('/models/DamagedHelmet.glb', (gltf) => {
+  const model = gltf.scene;
+  model.scale.set(50, 50, 50);
+  model.position.set(0, 20, 0);
+  model.castShadow = true;
+  model.receiveShadow = true;
+  cube.add(model);
 }, undefined, (error) => {
   console.log(error);
 });
-*/
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
 }
+
+window.addEventListener('resize', onWindowResize, false);
 animate();
