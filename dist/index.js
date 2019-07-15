@@ -142,7 +142,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var thre
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ \"./node_modules/three/build/three.module.js\");\n/* harmony import */ var _Viewport_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Viewport.jsx */ \"./jsx/Viewport.jsx\");\n/* harmony import */ var _SceneNode_jsx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SceneNode.jsx */ \"./jsx/SceneNode.jsx\");\n\n\n\nvar viewport = new _Viewport_jsx__WEBPACK_IMPORTED_MODULE_1__[\"default\"]();\nviewport.register();\nvar helmet = viewport.addNode({\n  position: new three__WEBPACK_IMPORTED_MODULE_0__[\"Vector3\"](-1.0, 2.2, -1.8),\n  url: '/models/DamagedHelmet.glb'\n});\nsetTimeout(function () {\n  return helmet.setModel(null);\n}, 3000);\nsetTimeout(function () {\n  return helmet.setPosition(new three__WEBPACK_IMPORTED_MODULE_0__[\"Vector3\"](0, 0, 0));\n}, 4500);\n\n//# sourceURL=webpack:///./jsx/index.jsx?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ \"./node_modules/three/build/three.module.js\");\n/* harmony import */ var _Viewport_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Viewport.jsx */ \"./jsx/Viewport.jsx\");\n/* harmony import */ var _SceneNode_jsx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SceneNode.jsx */ \"./jsx/SceneNode.jsx\");\n\n\n\nvar viewport = new _Viewport_jsx__WEBPACK_IMPORTED_MODULE_1__[\"default\"]();\nviewport.register();\nvar helmet = viewport.addNode({\n  position: new three__WEBPACK_IMPORTED_MODULE_0__[\"Vector3\"](-1.0, 2.2, -1.8),\n  url: '/models/DamagedHelmet.glb'\n}); //setTimeout(() => helmet.setModel(null), 3000);\n//setTimeout(() => helmet.setPosition(new THREE.Vector3(0, 0, 0)), 4500);\n\n//# sourceURL=webpack:///./jsx/index.jsx?");
 
 /***/ }),
 
@@ -176,7 +176,7 @@ eval("module.exports = \"varying vec3 vWorldPosition;\\r\\n\\r\\nvoid main() {\\
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"vec\", function() { return vec; });\nfunction vec(v) {\n  return new THREE.Vector3().copy(v);\n}\n\n\n\n//# sourceURL=webpack:///./jsx/util.jsx?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"vec\", function() { return vec; });\n/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ \"./node_modules/three/build/three.module.js\");\n\n\nfunction vec(v) {\n  return new three__WEBPACK_IMPORTED_MODULE_0__[\"Vector3\"]().copy(v);\n}\n\n\n\n//# sourceURL=webpack:///./jsx/util.jsx?");
 
 /***/ }),
 
