@@ -8,6 +8,9 @@ class Environment {
     scene.background = new THREE.Color().setHSL(0.6, 0, 1);
     scene.fog = new THREE.Fog(scene.background, 1, 5000);
 
+    this.axes = new THREE.AxesHelper(5);
+    scene.add(this.axes);
+
     this.initHemiLight(scene);
     this.initDirLight(scene);
     this.initGround(scene);
@@ -21,8 +24,8 @@ class Environment {
     this.hemiLight.position.set(0, 50, 0);
     scene.add(this.hemiLight);
 
-    this.hemiLightHelper = new THREE.HemisphereLightHelper(this.hemiLight, 10);
-    scene.add(this.hemiLightHelper);
+    //this.hemiLightHelper = new THREE.HemisphereLightHelper(this.hemiLight, 10);
+    //scene.add(this.hemiLightHelper);
   }
 
   initDirLight(scene) {
@@ -42,8 +45,8 @@ class Environment {
     this.dirLight.shadow.camera.far = 3500;
     this.dirLight.shadow.bias = - 0.0001;
 
-    this.dirLightHeper = new THREE.DirectionalLightHelper(this.dirLight, 10);
-    scene.add(this.dirLightHeper);
+    //this.dirLightHeper = new THREE.DirectionalLightHelper(this.dirLight, 10);
+    //scene.add(this.dirLightHeper);
   }
 
   initGround(scene) {

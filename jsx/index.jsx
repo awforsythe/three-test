@@ -16,4 +16,4 @@ setTimeout(() => {
     position: new THREE.Vector3(0.0, 0.6, -0.8),
     url: '/models/DamagedHelmet.glb',
   });
-}, 4500);
+}, 1500);

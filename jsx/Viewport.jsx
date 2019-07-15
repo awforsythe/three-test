@@ -7,15 +7,24 @@ import Controls from './Controls.jsx';
 import Environment from './Environment.jsx';
 import SceneNode from './SceneNode.jsx';
 
+const FRUSTUM_SIZE = 15.0;
+
 class Viewport {
   constructor() {
     THREE.Cache.enabled = true;
 
     this.hotkeys = new Hotkeys({
       70: { pressEvent: this.frameAll },
+      84: { pressEvent: this.toggleCamera },
     });
 
-    this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1.0, 8000.0);
+    const aspect = window.innerWidth / window.innerHeight;
+
+    this.perspCamera = new THREE.PerspectiveCamera(30, aspect, 1.0, 8000.0);
+    this.topCamera = new THREE.OrthographicCamera(FRUSTUM_SIZE * aspect * -0.5, FRUSTUM_SIZE * aspect * 0.5, FRUSTUM_SIZE * 0.5, FRUSTUM_SIZE * -0.5, 1.0, 1000.0);
+    this.topCamera.position.set(0, 5, 0);
+    this.camera = this.perspCamera;
+
     this.scene = new THREE.Scene();
     this.environment = new Environment(this.scene);
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -23,9 +32,6 @@ class Viewport {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.controls = new Controls(this.camera, this.renderer.domElement);
-
-    this.camera.position.set(10, 10, 10);
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
@@ -36,6 +42,8 @@ class Viewport {
     this.nodes = [];
 
     this.registered = false;
+
+    this.frameAll();
   }
 
   register() {
@@ -75,7 +83,7 @@ class Viewport {
   }
 
   getSceneBoundingBox() {
-    if (!this.nodes) {
+    if (this.nodes.length <= 0) {
       const s = 5.0;
       return new THREE.Box3(new THREE.Vector3(-s, -s, -s), new THREE.Vector3(s, s, s));
     }
@@ -99,6 +107,16 @@ class Viewport {
     this.controls.frame(aabb);
   };
 
+  toggleCamera = () => {
+    if (this.camera === this.perspCamera) {
+      this.camera = this.topCamera;
+    } else {
+      this.camera = this.perspCamera;
+    }
+    this.controls.setCamera(this.camera);
+    this.frameAll();
+  };
+
   onKeyDown = (event) => {
     this.hotkeys.onKeyDown(event.keyCode);
   };
@@ -108,8 +126,17 @@ class Viewport {
   };
 
   onWindowResize = () => {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
+    const aspect = window.innerWidth / window.innerHeight;
+
+    this.perspCamera.aspect = aspect;
+    this.perspCamera.updateProjectionMatrix();
+
+    this.topCamera.left = FRUSTUM_SIZE * aspect * -0.5;
+    this.topCamera.right = FRUSTUM_SIZE * aspect * 0.5;
+    this.topCamera.top = FRUSTUM_SIZE * 0.5;
+    this.topCamera.bottom = FRUSTUM_SIZE * -0.5;
+    this.topCamera.updateProjectionMatrix();
+
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   };
 
