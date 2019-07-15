@@ -1,7 +1,11 @@
 import Viewport from './Viewport.jsx';
-import SceneProxy from './SceneProxy.jsx';
+import SceneNode from './SceneNode.jsx';
 
 const viewport = new Viewport();
 viewport.register();
 
-const helmet = new SceneProxy(viewport, '/models/DamagedHelmet.glb');
+const helmet = viewport.addNode({ url: '/models/DamagedHelmet.glb' });
+
+setTimeout(() => {
+  viewport.removeNode(helmet);
+}, 5000);

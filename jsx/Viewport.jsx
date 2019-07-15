@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import Camera from './Camera.jsx';
 import Environment from './Environment.jsx';
-import Loader from './Loader.jsx';
-import SceneProxy from './SceneProxy.jsx';
+import SceneNode from './SceneNode.jsx';
 
 class Viewport {
   constructor() {
@@ -30,9 +30,9 @@ class Viewport {
     this.renderer.gammaOutput = true;
     this.renderer.shadowMap.enabled = true;
 
-    this.loader = new Loader();
+    this.loader = new GLTFLoader();
 
-    this.proxies = [];
+    this.nodes = [];
 
     this.registered = false;
   }
@@ -54,11 +54,18 @@ class Viewport {
     }
   }
 
-  add(proxy, modelUrl) {
-    this.proxies.push(proxy);
-    this.scene.add(proxy.group);
-    if (modelUrl) {
-      this.loader.load(modelUrl, proxy);
+  addNode(options) {
+    const node = new SceneNode(this.loader, options);
+    this.nodes.push(node);
+    this.scene.add(node.root);
+    return node;
+  }
+
+  removeNode(node) {
+    const index = this.nodes.findIndex(x => x == node);
+    if (index >= 0) {
+      this.nodes.splice(index, 1);
+      this.scene.remove(node.root);
     }
   }
 
