@@ -13,7 +13,7 @@ class SceneNode {
     this.loadingModelUrl = null;
 
     this.boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-    this.boxMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
+    this.boxMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00, transparent: true, opacity: 0.125 });
     this.box = new THREE.Mesh(this.boxGeometry, this.boxMaterial);
     this.root.add(this.box);
 
@@ -68,6 +68,16 @@ class SceneNode {
       this.box.scale.set(1, 1, 1);
       this.box.position.set(0, 0, 0);
     }
+  }
+
+  hover() {
+    this.boxMaterial.color.set(0xff9900);
+    this.boxMaterial.opacity = 0.5;
+  }
+
+  unhover() {
+   this.boxMaterial.color.set(0x00ff00);
+   this.boxMaterial.opacity = 0.125;
   }
 
   onLoad = (gltf) => {

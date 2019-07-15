@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import Hotkeys from './Hotkeys.jsx';
 import Controls from './Controls.jsx';
+import Selection from './Selection.jsx';
 import Environment from './Environment.jsx';
 import SceneNode from './SceneNode.jsx';
 
@@ -32,6 +33,7 @@ class Viewport {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.controls = new Controls(this.camera, this.renderer.domElement);
+    this.selection = new Selection();
 
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
@@ -50,9 +52,10 @@ class Viewport {
     if (!this.registered) {
       this.registered = true;
       document.body.appendChild(this.renderer.domElement);
-      document.addEventListener('keydown', this.onKeyDown);
-      document.addEventListener('keyup', this.onKeyUp);
       window.addEventListener('resize', this.onWindowResize, false);
+      this.selection.register();
+      this.hotkeys.register();
+
       this.animate();
     }
   }
@@ -60,10 +63,10 @@ class Viewport {
   unregister() {
     if (this.registered) {
       this.registered = false;
+      this.hotkeys.unregister();
+      this.selection.unregister();
       window.removeEventListener('resize', this.onWindowResize, false);
       document.body.removeChild(this.renderer.domElement);
-      document.removeEventListener('keydown', this.onKeyDown);
-      document.removeEventListener('keyup', this.onKeyUp);
     }
   }
 
@@ -117,14 +120,6 @@ class Viewport {
     this.frameAll();
   };
 
-  onKeyDown = (event) => {
-    this.hotkeys.onKeyDown(event.keyCode);
-  };
-
-  onKeyUp = (event) => {
-    this.hotkeys.onKeyUp(event.keyCode);
-  };
-
   onWindowResize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
@@ -144,6 +139,7 @@ class Viewport {
     if (this.registered) {
       requestAnimationFrame(this.animate);
       this.controls.update();
+      this.selection.update(this.camera, this.nodes);
       this.renderer.render(this.scene, this.camera);
     }
   };
