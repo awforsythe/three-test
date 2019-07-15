@@ -3,7 +3,7 @@ import * as THREE from 'three';
 class SceneNode {
   constructor(loader, options) {
     this.loader = loader;
-    this.options = options;
+    this.options = options || {};
     this.root = new THREE.Group();
 
     this.model = null;
@@ -16,13 +16,14 @@ class SceneNode {
   }
 
   setModel(url) {
-    if (url != this.loadedModelUrl) {
-      if (this.loadingModelUrl) {
-        console.log(`ERROR: Already loading model ${this.loadingModelUrl}; can not set new model to ${url}`);
-        return;
-      }
+    if (this.loadingModelUrl) {
+      console.log(`ERROR: Already loading model ${this.loadingModelUrl}; can not set new model to ${url}`);
+      return;
+    }
 
+    if (url != this.loadedModelUrl) {
       if (url) {
+        this.loadingModelUrl = url;
         this.loader.load(url, this.onLoad, undefined, this.onLoadError);
       } else {
         this.clearModel();

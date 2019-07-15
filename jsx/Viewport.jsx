@@ -9,6 +9,8 @@ import SceneNode from './SceneNode.jsx';
 
 class Viewport {
   constructor() {
+    THREE.Cache.enabled = true;
+
     this.camera = new Camera();
     this.scene = new THREE.Scene();
     this.environment = new Environment(this.scene);
