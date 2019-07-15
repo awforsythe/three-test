@@ -11,5 +11,9 @@ const helmet = viewport.addNode({
   url: '/models/DamagedHelmet.glb',
 });
 
-//setTimeout(() => helmet.setModel(null), 3000);
-//setTimeout(() => helmet.setPosition(new THREE.Vector3(0, 0, 0)), 4500);
+setTimeout(() => {
+  viewport.addNode({
+    position: new THREE.Vector3(0.0, 0.6, -0.8),
+    url: '/models/DamagedHelmet.glb',
+  });
+}, 4500);
