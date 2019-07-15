@@ -15,7 +15,7 @@ class Viewport {
     THREE.Cache.enabled = true;
 
     this.hotkeys = new Hotkeys({
-      70: { pressEvent: this.frameAll },
+      70: { pressEvent: this.frameSelection },
       84: { pressEvent: this.toggleCamera },
     });
 
@@ -45,7 +45,7 @@ class Viewport {
 
     this.registered = false;
 
-    this.frameAll();
+    this.frameSelection();
   }
 
   register() {
@@ -86,6 +86,10 @@ class Viewport {
   }
 
   getSceneBoundingBox() {
+    if (this.selection.selectedNode) {
+      return new THREE.Box3().setFromObject(this.selection.selectedNode.box);
+    }
+
     if (this.nodes.length <= 0) {
       const s = 5.0;
       return new THREE.Box3(new THREE.Vector3(-s, -s, -s), new THREE.Vector3(s, s, s));
@@ -105,7 +109,7 @@ class Viewport {
     return new THREE.Box3(min, max);
   }
 
-  frameAll = () => {
+  frameSelection = () => {
     const aabb = this.getSceneBoundingBox();
     this.controls.frame(aabb);
   };
@@ -117,7 +121,7 @@ class Viewport {
       this.camera = this.perspCamera;
     }
     this.controls.setCamera(this.camera);
-    this.frameAll();
+    this.frameSelection();
   };
 
   onWindowResize = () => {

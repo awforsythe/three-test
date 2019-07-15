@@ -28,7 +28,6 @@ class Selection {
   };
 
   onMouseDown = (event) => {
-    console.log(event.clientX);
     this.lastMouseDownPos.x = (event.clientX / window.innerWidth) * 2.0 - 1.0;
     this.lastMouseDownPos.y = -(event.clientY / window.innerHeight) * 2.0 + 1.0;
   };
