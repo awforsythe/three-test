@@ -6,16 +6,10 @@ import SceneNode from './SceneNode.jsx';
 const viewport = new Viewport();
 viewport.register();
 
-const helmet = viewport.addNode();
+const helmet = viewport.addNode({
+  position: new THREE.Vector3(-1.0, 2.2, -1.8),
+  url: '/models/DamagedHelmet.glb',
+});
 
-setTimeout(() => {
-  helmet.setModel('/models/DamagedHelmet.glb');
-}, 5000);
-
-setTimeout(() => {
-  helmet.setModel(null);
-}, 6000);
-
-setTimeout(() => {
-  helmet.setModel('/models/DamagedHelmet.glb');
-}, 6500);
+setTimeout(() => helmet.setModel(null), 3000);
+setTimeout(() => helmet.setPosition(new THREE.Vector3(0, 0, 0)), 4500);

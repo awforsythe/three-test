@@ -20,13 +20,8 @@ class Viewport {
 
     this.controls = new OrbitControls(this.camera.camera, this.renderer.domElement);
 
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    this.cube = new THREE.Mesh(geometry, material);
-    this.scene.add(this.cube);
-
     this.camera.camera.position.set(10, 10, 10);
-    this.camera.camera.lookAt(this.cube.position);
+    this.camera.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
