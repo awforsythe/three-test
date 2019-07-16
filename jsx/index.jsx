@@ -9,8 +9,8 @@ import ThemeProvider from './ThemeProvider.jsx';
 
 import * as THREE from 'three';
 
-import Viewport from './Viewport.jsx';
-import SceneNode from './SceneNode.jsx';
+import Viewport from './view3d/Viewport.jsx';
+import SceneNode from './view3d/SceneNode.jsx';
 
 function addTestModels(viewport) {
   const helmet = viewport.addNode({
