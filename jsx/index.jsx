@@ -23,7 +23,7 @@ function addTestModels(viewport) {
       position: new THREE.Vector3(0.0, 0.6, -0.8),
       url: '/models/DamagedHelmet.glb',
     });
-    helmet.setPosition(new THREE.Vector3(-1.2, 2.4, -2.2));
+    helmet.setPosition(new THREE.Vector3(-4.2, 2.4, -2.2));
   }, 1500);
 }
 
@@ -80,7 +80,7 @@ class ReactViewport extends React.Component {
         <Typography variant="h6">Camera: {camera}</Typography>
         <div
           ref={this.setDivRef}
-          style={{ width: 800, height: 600, margin: 8, border: '1px solid #999' }}
+          style={{ width: 800, height: 500, margin: 8, border: '1px solid #999' }}
         />
       </React.Fragment>
     );
@@ -119,7 +119,7 @@ class App extends React.Component {
         <Button
           color="primary"
           variant="contained"
-          onClick={() => setCount(count + 1)}
+          onClick={() => this.setState({ count: this.state.count + 1 })}
         >
           Increment
         </Button>

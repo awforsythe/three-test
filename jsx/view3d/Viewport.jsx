@@ -24,7 +24,7 @@ class Viewport {
 
     const aspect = this.container.clientWidth / this.container.clientHeight;
 
-    this.perspCamera = new THREE.PerspectiveCamera(30, aspect, 1.0, 8000.0);
+    this.perspCamera = new THREE.PerspectiveCamera(55, aspect, 1.0, 8000.0);
     this.topCamera = new THREE.OrthographicCamera(FRUSTUM_SIZE * aspect * -0.5, FRUSTUM_SIZE * aspect * 0.5, FRUSTUM_SIZE * 0.5, FRUSTUM_SIZE * -0.5, 1.0, 1000.0);
     this.topCamera.position.set(0, 5, 0);
     this.camera = cameraType === 'top' ? this.topCamera : this.perspCamera;
