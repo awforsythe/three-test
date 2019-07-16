@@ -82,8 +82,9 @@ class Controls {
     const dim = vec(aabb.max).sub(aabb.min);
     const maxDim = Math.max(dim.x, Math.max(dim.y, dim.z));
 
+    const isVertical = this.camera.aspect < 1.0;
     const fovRadians = this.camera.fov * (Math.PI / 180.0);
-    const cameraDistance = (maxDim * 0.75) / Math.tan(fovRadians * 0.5);
+    const cameraDistance = (maxDim * 0.75) / Math.tan(fovRadians * 0.5) / (isVertical ? this.camera.aspect : 1.0);
 
     this.orbit.target0 = center;
     this.orbit.position0 = vec(center).add(targetToPos.multiplyScalar(cameraDistance));
