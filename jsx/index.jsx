@@ -37,7 +37,7 @@ class ReactViewport extends React.Component {
   componentDidMount() {
     if (!this.viewport) {
       if (this.divRef) {
-        this.viewport = new Viewport(this.divRef);
+        this.viewport = new Viewport(this.divRef, this.props.camera == 'top');
         this.viewport.register();
         addTestModels(this.viewport);
       } else {
@@ -57,17 +57,25 @@ class ReactViewport extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    console.log(`ReactViewport componentDidUpdate (${prevProps.camera} ==> ${this.props.camera})`);
+    if (this.props.camera !== prevProps.camera) {
+      this.viewport.setCameraType(this.props.camera);
+    }
+  }
+
   setDivRef = (ref) => {
     console.log('ReactViewport setDivRef');
     this.divRef = ref;
   };
 
   render() {
-    const { count } = this.props;
-    console.log(`ReactViewport render (count: ${count})`);
+    const { count, camera } = this.props;
+    console.log(`ReactViewport render (count: ${count}, camera: ${camera})`);
     return (
       <React.Fragment>
         <Typography variant="h6">Count is {count}</Typography>
+        <Typography variant="h6">Camera: {camera}</Typography>
         <div
           ref={this.setDivRef}
           style={{ width: 800, height: 600, margin: 8, border: '1px solid #999' }}
@@ -78,20 +86,32 @@ class ReactViewport extends React.Component {
 }
 ReactViewport.propTypes = {
   count: PropTypes.number.isRequired,
+  camera: PropTypes.oneOf(['top', 'persp']).isRequired,
 };
 
 function App(props) {
   const [count, setCount] = useState(0);
+  const [camera, setCamera] = useState('persp');
   return (
     <ThemeProvider>
       <Typography variant="h3">Hello</Typography>
-      <ReactViewport count={count} />
+      <ReactViewport
+        count={count}
+        camera={camera}
+      />
       <Button
         color="primary"
         variant="contained"
         onClick={() => setCount(count + 1)}
       >
         Increment
+      </Button>
+      <Button
+        color="primary"
+        variant="contained"
+        onClick={() => setCamera(camera == 'persp' ? 'top' : 'persp')}
+      >
+        Toggle Camera
       </Button>
     </ThemeProvider>
   );

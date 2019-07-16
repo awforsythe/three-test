@@ -11,7 +11,7 @@ import SceneNode from './SceneNode.jsx';
 const FRUSTUM_SIZE = 15.0;
 
 class Viewport {
-  constructor(container) {
+  constructor(container, useTopCamera) {
     this.container = container;
 
     THREE.Cache.enabled = true;
@@ -26,7 +26,7 @@ class Viewport {
     this.perspCamera = new THREE.PerspectiveCamera(30, aspect, 1.0, 8000.0);
     this.topCamera = new THREE.OrthographicCamera(FRUSTUM_SIZE * aspect * -0.5, FRUSTUM_SIZE * aspect * 0.5, FRUSTUM_SIZE * 0.5, FRUSTUM_SIZE * -0.5, 1.0, 1000.0);
     this.topCamera.position.set(0, 5, 0);
-    this.camera = this.perspCamera;
+    this.camera = useTopCamera ? this.topCamera : this.perspCamera;
 
     this.scene = new THREE.Scene();
     this.environment = new Environment(this.scene);
@@ -69,6 +69,18 @@ class Viewport {
       this.selection.unregister();
       window.removeEventListener('resize', this.onWindowResize, false);
       this.container.removeChild(this.renderer.domElement);
+    }
+  }
+
+  setCameraType(newCameraType) {
+    if (newCameraType === 'persp') {
+      if (this.camera !== this.perspCamera) {
+        this.toggleCamera();
+      }
+    } else if (newCameraType === 'top') {
+      if (this.camera !== this.topCamera) {
+        this.toggleCamera();
+      }
     }
   }
 
