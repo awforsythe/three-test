@@ -80,7 +80,7 @@ class ReactViewport extends React.Component {
         <Typography variant="h6">Camera: {camera}</Typography>
         <div
           ref={this.setDivRef}
-          style={{ width: 800, height: 500, margin: 8, border: '1px solid #999' }}
+          style={{ width: 640, height: 640, margin: 8, border: '1px solid #999' }}
         />
       </React.Fragment>
     );

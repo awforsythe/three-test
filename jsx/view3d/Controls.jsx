@@ -24,6 +24,8 @@ class Controls {
       this.orbit = new OrbitControls(this.camera, this.domElement);
       if (this.camera.isOrthographicCamera) {
         this.orbit.enableRotate = false;
+      } else {
+        this.orbit.screenSpacePanning = true;
       }
     }
   }
@@ -75,19 +77,16 @@ class Controls {
   }
 
   framePersp(aabb, center) {
-    const pos = (this.camera.position.distanceToSquared(center) > 0.01) ? this.camera.position : vec(center).add(new THREE.Vector3(1.0, 0.0, 0.0));
+    const isOverlapping = this.camera.position.distanceToSquared(center) < 0.01;
+    const targetToPos = isOverlapping ? new THREE.Vector3(1.0, 0.0, 0.0) : vec(this.camera.position).sub(this.orbit.target).normalize();
+    const dim = vec(aabb.max).sub(aabb.min);
+    const maxDim = Math.max(dim.x, Math.max(dim.y, dim.z));
 
-    // Run a ray-box intersection to get a point on the AABB's surface from the current camera positioon
-    const toCenter = vec(center).sub(pos).normalize();
-    const ray = new THREE.Ray(pos, toCenter);
-    const intersect = ray.intersectBox(aabb, new THREE.Vector3());
-
-    // Get the direction pointing out from the center of the AABB to that intersection point
-    const toIntersect = vec(intersect).sub(center).normalize();
-    const newPos = vec(intersect).add(toIntersect.multiplyScalar(5.0));
+    const fovRadians = this.camera.fov * (Math.PI / 180.0);
+    const cameraDistance = (maxDim * 0.75) / Math.tan(fovRadians * 0.5);
 
     this.orbit.target0 = center;
-    this.orbit.position0 = newPos;
+    this.orbit.position0 = vec(center).add(targetToPos.multiplyScalar(cameraDistance));
     this.orbit.zoom0 = 1.0;
     this.orbit.reset();
   }
