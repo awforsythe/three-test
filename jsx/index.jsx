@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+
+import ThemeProvider from './ThemeProvider.jsx';
+
 import * as THREE from 'three';
 
 import Viewport from './Viewport.jsx';
@@ -62,7 +67,7 @@ class ReactViewport extends React.Component {
     console.log(`ReactViewport render (count: ${count})`);
     return (
       <React.Fragment>
-        <h3>Count is {count}</h3>
+        <Typography variant="h6">Count is {count}</Typography>
         <div
           ref={this.setDivRef}
           style={{ width: 800, height: 600, margin: 8, border: '1px solid #999' }}
@@ -78,11 +83,17 @@ ReactViewport.propTypes = {
 function App(props) {
   const [count, setCount] = useState(0);
   return (
-    <React.Fragment>
-      <h1>Hello</h1>
+    <ThemeProvider>
+      <Typography variant="h3">Hello</Typography>
       <ReactViewport count={count} />
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-    </React.Fragment>
+      <Button
+        color="primary"
+        variant="contained"
+        onClick={() => setCount(count + 1)}
+      >
+        Increment
+      </Button>
+    </ThemeProvider>
   );
 }
 
