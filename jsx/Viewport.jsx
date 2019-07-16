@@ -11,7 +11,9 @@ import SceneNode from './SceneNode.jsx';
 const FRUSTUM_SIZE = 15.0;
 
 class Viewport {
-  constructor() {
+  constructor(container) {
+    this.container = container;
+
     THREE.Cache.enabled = true;
 
     this.hotkeys = new Hotkeys({
@@ -19,7 +21,7 @@ class Viewport {
       84: { pressEvent: this.toggleCamera },
     });
 
-    const aspect = window.innerWidth / window.innerHeight;
+    const aspect = this.container.clientWidth / this.container.clientHeight;
 
     this.perspCamera = new THREE.PerspectiveCamera(30, aspect, 1.0, 8000.0);
     this.topCamera = new THREE.OrthographicCamera(FRUSTUM_SIZE * aspect * -0.5, FRUSTUM_SIZE * aspect * 0.5, FRUSTUM_SIZE * 0.5, FRUSTUM_SIZE * -0.5, 1.0, 1000.0);
@@ -30,10 +32,10 @@ class Viewport {
     this.environment = new Environment(this.scene);
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
 
     this.controls = new Controls(this.camera, this.renderer.domElement);
-    this.selection = new Selection();
+    this.selection = new Selection(this.container);
 
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
@@ -51,7 +53,7 @@ class Viewport {
   register() {
     if (!this.registered) {
       this.registered = true;
-      document.body.appendChild(this.renderer.domElement);
+      this.container.appendChild(this.renderer.domElement);
       window.addEventListener('resize', this.onWindowResize, false);
       this.selection.register();
       this.hotkeys.register();
@@ -66,7 +68,7 @@ class Viewport {
       this.hotkeys.unregister();
       this.selection.unregister();
       window.removeEventListener('resize', this.onWindowResize, false);
-      document.body.removeChild(this.renderer.domElement);
+      this.container.removeChild(this.renderer.domElement);
     }
   }
 
@@ -125,7 +127,7 @@ class Viewport {
   };
 
   onWindowResize = () => {
-    const aspect = window.innerWidth / window.innerHeight;
+    const aspect = this.container.clientWidth / this.container.clientHeight;
 
     this.perspCamera.aspect = aspect;
     this.perspCamera.updateProjectionMatrix();
@@ -136,7 +138,7 @@ class Viewport {
     this.topCamera.bottom = FRUSTUM_SIZE * -0.5;
     this.topCamera.updateProjectionMatrix();
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
   };
 
   animate = () => {

@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 
 class Selection {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.mousePos = new THREE.Vector2();
     this.lastMouseDownPos = new THREE.Vector2();
+    this.lastMouseUpPos = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.hoveredNode = null;
     this.selectedNode = null;
@@ -21,33 +23,47 @@ class Selection {
     document.removeEventListener('mouseup', this.onMouseUp);
   }
 
+  updateMousePos(clientX, clientY, target) {
+    const rect = this.container.getBoundingClientRect();
+    const mouseX = Math.round(clientX - Math.round(rect.left));
+    const mouseY = Math.round(clientY - Math.round(rect.top));
+    const unitX = (mouseX / rect.width) * 2.0 - 1.0;
+    const unitY = -(mouseY / rect.height) * 2.0 + 1.0;
+    if (unitX >= -1.0 && unitX <= 1.0 && unitY >= -1.0 && unitY <= 1.0) {
+      target.x = unitX;
+      target.y = unitY;
+      return true;
+    }
+    return false;
+  }
+
   onMouseMove = (event) => {
     event.preventDefault();
-    this.mousePos.x = (event.clientX / window.innerWidth) * 2.0 - 1.0;
-    this.mousePos.y = -(event.clientY / window.innerHeight) * 2.0 + 1.0;
+    this.updateMousePos(event.clientX, event.clientY, this.mousePos);
   };
 
   onMouseDown = (event) => {
-    this.lastMouseDownPos.x = (event.clientX / window.innerWidth) * 2.0 - 1.0;
-    this.lastMouseDownPos.y = -(event.clientY / window.innerHeight) * 2.0 + 1.0;
+    this.updateMousePos(event.clientX, event.clientY, this.lastMouseDownPos);
   };
 
   onMouseUp = (event) => {
-    const xPos = (event.clientX / window.innerWidth) * 2.0 - 1.0;
-    const yPos = -(event.clientY / window.innerHeight) * 2.0 + 1.0;
-    if (Math.abs(xPos - this.lastMouseDownPos.x) < 0.001 && Math.abs(yPos - this.lastMouseDownPos.y) < 0.001) {
-      if (this.hoveredNode) {
-        if (this.hoveredNode !== this.selectedNode) {
+    if (this.updateMousePos(event.clientX, event.clientY, this.lastMouseUpPos)) {
+      const xDelta = Math.abs(this.lastMouseUpPos.x - this.lastMouseDownPos.x);
+      const yDelta = Math.abs(this.lastMouseUpPos.y - this.lastMouseDownPos.y);
+      if (xDelta < 0.001 && yDelta < 0.001) {
+        if (this.hoveredNode) {
+          if (this.hoveredNode !== this.selectedNode) {
+            if (this.selectedNode) {
+              this.selectedNode.deselect();
+            }
+            this.selectedNode = this.hoveredNode;
+            this.selectedNode.select();
+          }
+        } else {
           if (this.selectedNode) {
             this.selectedNode.deselect();
+            this.selectedNode = null;
           }
-          this.selectedNode = this.hoveredNode;
-          this.selectedNode.select();
-        }
-      } else {
-        if (this.selectedNode) {
-          this.selectedNode.deselect();
-          this.selectedNode = null;
         }
       }
     }
