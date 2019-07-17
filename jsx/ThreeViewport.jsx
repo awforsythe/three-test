@@ -52,7 +52,7 @@ class ThreeViewport extends React.Component {
       <React.Fragment>
         <div
           ref={this.setDivRef}
-          style={{ width: 1280, height: 720, margin: 8, border: '1px solid #999' }}
+          style={{ height: '70vh', margin: 8, border: '1px solid #999' }}
         />
       </React.Fragment>
     );
