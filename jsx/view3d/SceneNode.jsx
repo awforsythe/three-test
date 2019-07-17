@@ -15,7 +15,7 @@ class SceneNode {
     this.loadingModelUrl = null;
 
     this.boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-    this.boxMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00, transparent: true, opacity: 0.125 });
+    this.boxMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
     this.box = new THREE.Mesh(this.boxGeometry, this.boxMaterial);
     this.root.add(this.box);
 
@@ -77,47 +77,6 @@ class SceneNode {
 
   updateBox() {
     this.box.visible = !this.model;
-  }
-
-  hover() {
-    if (!this.hovered) {
-      this.hovered = true;
-      this.updateMaterial();
-    }
-  }
-
-  unhover() {
-    if (this.hovered) {
-      this.hovered = false;
-      this.updateMaterial();
-    }
-  }
-
-  select() {
-    if (!this.selected) {
-      this.selected = true;
-      this.updateMaterial();
-    }
-  }
-
-  deselect() {
-    if (this.selected) {
-      this.selected = false;
-      this.updateMaterial();
-    }
-  }
-
-  updateMaterial() {
-    if (this.selected) {
-      this.boxMaterial.color.set(this.hovered ? 0x9999ff : 0x6699ff);
-      this.boxMaterial.opacity = 0.5;
-    } else if (this.hovered) {
-      this.boxMaterial.color.set(0xff9900);
-      this.boxMaterial.opacity = 0.5;
-    } else {
-      this.boxMaterial.color.set(0x00ff00);
-      this.boxMaterial.opacity = 0.125;
-    }
   }
 
   onLoad = (gltf) => {

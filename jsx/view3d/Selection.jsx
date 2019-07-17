@@ -58,16 +58,11 @@ class Selection {
         if (xDelta < 0.05 && yDelta < 0.05) {
           if (this.hoveredNode) {
             if (this.hoveredNode !== this.selectedNode) {
-              if (this.selectedNode) {
-                this.selectedNode.deselect();
-              }
               this.selectedNode = this.hoveredNode;
-              this.selectedNode.select();
               this.updateOutlines();
             }
           } else {
             if (this.selectedNode) {
-              this.selectedNode.deselect();
               this.selectedNode = null;
               this.updateOutlines();
             }
@@ -99,16 +94,11 @@ class Selection {
     const node = results.length > 0 ? nodes.find(x => x.isParentTo(results[0].object)) : null;
     if (node) {
       if (node !== this.hoveredNode) {
-        if (this.hoveredNode) {
-          this.hoveredNode.unhover();
-        }
         this.hoveredNode = node;
-        this.hoveredNode.hover();
         this.updateOutlines();
       }
     } else {
       if (this.hoveredNode) {
-        this.hoveredNode.unhover();
         this.hoveredNode = null;
         this.updateOutlines();
       }
