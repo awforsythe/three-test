@@ -54,7 +54,7 @@ class ThreeViewport extends React.Component {
   };
 
   render() {
-    const { topLeft, topRight } = this.props;
+    const { topLeft, topRight, children } = this.props;
     return (
       <React.Fragment>
         <div
@@ -74,6 +74,7 @@ class ThreeViewport extends React.Component {
             )}
           </div>
         </div>
+        {React.Children.map(children, (x) => !!x.props.viewport).every((x) => x === true) && children}
       </React.Fragment>
     );
   }

@@ -8,6 +8,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 import ThreeViewport from './ThreeViewport.jsx';
+import ThreeSceneNode from './ThreeSceneNode.jsx';
 
 const StyledButton = withStyles({
   root: {
@@ -29,21 +30,30 @@ function ViewportButton(props) {
   );
 }
 
-function addTestModels(viewport) {
-  const helmet = viewport.addNode({
-    position: new THREE.Vector3(0.0, 1.0, 0.0),
-    url: '/models/DamagedHelmet.glb',
-  });
-}
-
 class SceneExplorer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       camera: 'persp',
       frameSceneCount: 0,
+      yPos: 1.0,
     };
   }
+
+  onViewportRegister = (viewport) => {
+    this.viewport = viewport;
+    this.forceUpdate();
+  };
+
+  nudgeTestModelUp = () => {
+    const { yPos } = this.state;
+    this.setState({ yPos: yPos + 0.1 });
+  };
+
+  nudgeTestModelDown = () => {
+    const { yPos } = this.state;
+    this.setState({ yPos: yPos - 0.1 });
+  };
 
   toggleCamera = () => {
     const { camera } = this.state;
@@ -56,7 +66,21 @@ class SceneExplorer extends React.Component {
   };
 
   render() {
-    const { camera, frameSceneCount } = this.state;
+    const { camera, frameSceneCount, yPos } = this.state;
+    const nudgeButtons = (
+      <div>
+        <ViewportButton
+          label="Up"
+          style={{ width: 32 }}
+          onClick={this.nudgeTestModelUp}
+        />
+        <ViewportButton
+          label="Down"
+          style={{ width: 32, marginLeft: 4 }}
+          onClick={this.nudgeTestModelDown}
+        />
+      </div>
+    );
     const controls = (
       <div>
         <ViewportButton
@@ -75,11 +99,23 @@ class SceneExplorer extends React.Component {
       <ThreeViewport
         camera={camera}
         frameSceneCount={frameSceneCount}
-        onRegister={addTestModels}
+        onRegister={this.onViewportRegister}
         onToggleCamera={this.toggleCamera}
         onFrameScene={this.frameScene}
+        topLeft={nudgeButtons}
         topRight={controls}
-      />
+      >
+        <ThreeSceneNode
+          viewport={this.viewport}
+          xPos={0.0} yPos={yPos} zPos={0.0}
+          modelUrl="/models/DamagedHelmet.glb"
+        />
+        <ThreeSceneNode
+          viewport={this.viewport}
+          xPos={2.0} yPos={0.5} zPos={0.0}
+          modelUrl="/models/DamagedHelmet.glb"
+        />
+      </ThreeViewport>
     );
   }
 }
