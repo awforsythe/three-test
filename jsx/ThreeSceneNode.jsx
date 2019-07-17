@@ -9,10 +9,11 @@ class ThreeSceneNode extends React.Component {
   }
 
   componentDidMount() {
-    const { viewport, xPos, yPos, zPos, modelUrl } = this.props;
+    const { viewport, xPos, yPos, zPos, modelUrl, reframeOnModelLoad } = this.props;
     this.node = viewport.addNode({
       position: new THREE.Vector3(xPos, yPos, zPos),
       url: modelUrl,
+      reframeOnModelLoad,
     });
   }
 
@@ -40,6 +41,7 @@ ThreeSceneNode.propTypes = {
   yPos: PropTypes.number.isRequired,
   zPos: PropTypes.number.isRequired,
   modelUrl: PropTypes.string.isRequired,
+  reframeOnModelLoad: PropTypes.bool,
 };
 
 export default ThreeSceneNode;
