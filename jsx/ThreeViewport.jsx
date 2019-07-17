@@ -17,6 +17,7 @@ class ThreeViewport extends React.Component {
       if (this.divRef) {
         this.viewport = new Viewport(this.divRef, this.props.camera, {
           84: { pressEvent: this.props.onToggleCamera },
+          70: { pressEvent: this.props.onFrameScene },
         });
         this.viewport.register();
         if (this.props.onRegister) {
@@ -42,6 +43,9 @@ class ThreeViewport extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.camera !== prevProps.camera) {
       this.viewport.setCameraType(this.props.camera);
+    }
+    if (this.props.frameSceneCount !== prevProps.frameSceneCount) {
+      this.viewport.frameSelection();
     }
   }
 
@@ -76,10 +80,12 @@ class ThreeViewport extends React.Component {
 }
 ThreeViewport.propTypes = {
   camera: PropTypes.oneOf(['top', 'persp']).isRequired,
+  frameSceneCount: PropTypes.number.isRequired,
   topLeft: PropTypes.element,
   topRight: PropTypes.element,
   onRegister: PropTypes.func,
   onToggleCamera: PropTypes.func,
+  onFrameScene: PropTypes.func,
 };
 
 export default ThreeViewport;

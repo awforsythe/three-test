@@ -2,11 +2,32 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as THREE from 'three';
 
+import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 import ThreeViewport from './ThreeViewport.jsx';
+
+const StyledButton = withStyles({
+  root: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+})(Button);
+
+function ViewportButton(props) {
+  const { label, ...others } = props;
+  return (
+    <StyledButton
+      disableRipple
+      color="primary"
+      variant="outlined"
+      {...others}
+    >
+      {label}
+    </StyledButton>
+  );
+}
 
 function addTestModels(viewport) {
   const helmet = viewport.addNode({
@@ -28,6 +49,7 @@ class SceneExplorer extends React.Component {
     super(props);
     this.state = {
       camera: 'persp',
+      frameSceneCount: 0,
     };
   }
 
@@ -36,25 +58,35 @@ class SceneExplorer extends React.Component {
     this.setState({ camera: camera === 'persp' ? 'top' : 'persp' });
   };
 
+  frameScene = () => {
+    const { frameSceneCount } = this.state;
+    this.setState({ frameSceneCount: frameSceneCount + 1 });
+  };
+
   render() {
-    const { camera } = this.state;
-    const cameraButton = (
-      <Button
-        disableRipple
-        style={{ width: 32 }}
-        color="primary"
-        variant="outlined"
-        onClick={this.toggleCamera}
-      >
-        {camera === 'persp' ? '3D' : 'TOP'}
-      </Button>
+    const { camera, frameSceneCount } = this.state;
+    const controls = (
+      <div>
+        <ViewportButton
+          label="Frame"
+          style={{ width: 32, marginRight: 4 }}
+          onClick={this.frameScene}
+        />
+        <ViewportButton
+          label={camera === 'persp' ? '3D' : 'TOP'}
+          style={{ width: 32 }}
+          onClick={this.toggleCamera}
+        />
+      </div>
     );
     return (
       <ThreeViewport
         camera={camera}
+        frameSceneCount={frameSceneCount}
         onRegister={addTestModels}
         onToggleCamera={this.toggleCamera}
-        topRight={cameraButton}
+        onFrameScene={this.frameScene}
+        topRight={controls}
       />
     );
   }

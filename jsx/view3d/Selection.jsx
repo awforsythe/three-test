@@ -43,26 +43,30 @@ class Selection {
   };
 
   onMouseDown = (event) => {
-    this.updateMousePos(event.clientX, event.clientY, this.lastMouseDownPos);
+    if (event.target.parentNode === this.container) {
+      this.updateMousePos(event.clientX, event.clientY, this.lastMouseDownPos);
+    }
   };
 
   onMouseUp = (event) => {
-    if (this.updateMousePos(event.clientX, event.clientY, this.lastMouseUpPos)) {
-      const xDelta = Math.abs(this.lastMouseUpPos.x - this.lastMouseDownPos.x);
-      const yDelta = Math.abs(this.lastMouseUpPos.y - this.lastMouseDownPos.y);
-      if (xDelta < 0.05 && yDelta < 0.05) {
-        if (this.hoveredNode) {
-          if (this.hoveredNode !== this.selectedNode) {
+    if (event.target.parentNode === this.container) {
+      if (this.updateMousePos(event.clientX, event.clientY, this.lastMouseUpPos)) {
+        const xDelta = Math.abs(this.lastMouseUpPos.x - this.lastMouseDownPos.x);
+        const yDelta = Math.abs(this.lastMouseUpPos.y - this.lastMouseDownPos.y);
+        if (xDelta < 0.05 && yDelta < 0.05) {
+          if (this.hoveredNode) {
+            if (this.hoveredNode !== this.selectedNode) {
+              if (this.selectedNode) {
+                this.selectedNode.deselect();
+              }
+              this.selectedNode = this.hoveredNode;
+              this.selectedNode.select();
+            }
+          } else {
             if (this.selectedNode) {
               this.selectedNode.deselect();
+              this.selectedNode = null;
             }
-            this.selectedNode = this.hoveredNode;
-            this.selectedNode.select();
-          }
-        } else {
-          if (this.selectedNode) {
-            this.selectedNode.deselect();
-            this.selectedNode = null;
           }
         }
       }
