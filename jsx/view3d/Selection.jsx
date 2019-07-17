@@ -74,14 +74,14 @@ class Selection {
   };
 
   update(camera, nodes) {
-    let boxes = []
+    let collisionObjects = []
     for (const node of nodes) {
-      boxes.push(node.box);
+      collisionObjects.push(node.getCollisionObject());
     }
     this.raycaster.setFromCamera(this.mousePos, camera);
 
-    const results = this.raycaster.intersectObjects(boxes);
-    const node = results.length > 0 ? nodes.find(x => x.box === results[0].object) : null;
+    const results = this.raycaster.intersectObjects(collisionObjects, true);
+    const node = results.length > 0 ? nodes.find(x => x.isParentTo(results[0].object)) : null;
     if (node) {
       if (node !== this.hoveredNode) {
         if (this.hoveredNode) {

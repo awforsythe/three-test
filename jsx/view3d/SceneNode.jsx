@@ -57,6 +57,24 @@ class SceneNode {
     }
   }
 
+  getCollisionObject() {
+    if (this.model) {
+      return this.model;
+    }
+    return this.box;
+  }
+
+  isParentTo(obj) {
+    let parent = obj.parent;
+    while (parent) {
+      if (parent === this.root) {
+        return true;
+      }
+      parent = parent.parent;
+    }
+    return false;
+  }
+
   updateBox() {
     if (this.model) {
       const aabb = new THREE.Box3().setFromObject(this.model);

@@ -31,17 +31,9 @@ function ViewportButton(props) {
 
 function addTestModels(viewport) {
   const helmet = viewport.addNode({
-    position: new THREE.Vector3(-1.0, 2.2, -1.8),
+    position: new THREE.Vector3(0.0, 1.0, 0.0),
     url: '/models/DamagedHelmet.glb',
   });
-
-  setTimeout(() => {
-    viewport.addNode({
-      position: new THREE.Vector3(0.0, 0.6, -0.8),
-      url: '/models/DamagedHelmet.glb',
-    });
-    helmet.setPosition(new THREE.Vector3(-4.2, 2.4, -2.2));
-  }, 1500);
 }
 
 class SceneExplorer extends React.Component {
