@@ -8,13 +8,11 @@ class Environment {
     scene.background = new THREE.Color().setHSL(0.6, 0, 1);
     scene.fog = new THREE.Fog(scene.background, 1, 5000);
 
-    this.axes = new THREE.AxesHelper(5);
-    scene.add(this.axes);
-
     this.initHemiLight(scene);
     this.initDirLight(scene);
     this.initGround(scene);
     this.initSky(scene);
+    this.initGrid(scene);
   }
 
   initHemiLight(scene) {
@@ -51,8 +49,7 @@ class Environment {
 
   initGround(scene) {
     const geo = new THREE.PlaneBufferGeometry(10000, 10000);
-    const mat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    mat.color.setHSL(0.095, 1, 0.75);
+    const mat = new THREE.MeshLambertMaterial({ color: 0x999999 });
 
     this.ground = new THREE.Mesh(geo, mat);
     this.ground.position.y = -33;
@@ -80,6 +77,23 @@ class Environment {
     });
     this.sky = new THREE.Mesh(geo, mat);
     scene.add(this.sky);
+  }
+
+  initGrid(scene) {
+    const gridSize = 10;
+    const gridDivisions = 10;
+
+    this.gridPlaneGeometry = new THREE.PlaneBufferGeometry(gridSize, gridSize);
+    this.gridPlaneMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.1, side: THREE.DoubleSide });
+    this.gridPlane = new THREE.Mesh(this.gridPlaneGeometry, this.gridPlaneMaterial);
+    this.gridPlane.rotation.set(Math.PI * 0.5, 0, 0);
+    scene.add(this.gridPlane);
+
+    this.gridHelper = new THREE.GridHelper(gridSize, gridDivisions);
+    scene.add(this.gridHelper);
+
+    this.axes = new THREE.AxesHelper(gridSize / gridDivisions);
+    scene.add(this.axes);
   }
 }
 

@@ -11,7 +11,7 @@ import ThreeViewport from './ThreeViewport.jsx';
 
 const StyledButton = withStyles({
   root: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.075)',
   },
 })(Button);
 
