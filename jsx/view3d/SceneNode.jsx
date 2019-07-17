@@ -3,9 +3,10 @@ import * as THREE from 'three';
 import { vec } from './util.jsx';
 
 class SceneNode {
-  constructor(loader, options) {
+  constructor(loader, options, onModelLoad) {
     this.loader = loader;
     this.options = options || {};
+    this.onModelLoad = onModelLoad;
     this.hovered = false;
     this.selected = false;
     this.root = new THREE.Group();
@@ -87,6 +88,10 @@ class SceneNode {
     this.root.add(this.model);
 
     this.updateBox();
+
+    if (this.onModelLoad) {
+      this.onModelLoad();
+    }
   };
 
   onLoadError = (error) => {
