@@ -64,12 +64,14 @@ class Controls {
 
     // Compute an extra padding (independent of scene scale) around our objects
     const paddingPixels = 16.0;
-    const wPixelsToScene = hOrtho / this.domElement.clientWidth;
-    const hPixelsToScene = vOrtho / this.domElement.clientHeight;
+    const width = this.domElement.clientWidth || 640;
+    const height = this.domElement.clientHeight || 480;
+    const wPad = paddingPixels * hOrtho / width;
+    const hPad = paddingPixels * vOrtho / height;
 
     // Apply the final zoom that fits our entire bounding box in the orthographic view, with some padding
-    const hZoom = (hOrtho - paddingPixels * wPixelsToScene) / hSize;
-    const vZoom = (vOrtho - paddingPixels * hPixelsToScene) / vSize;
+    const hZoom = (hOrtho - wPad) / hSize;
+    const vZoom = (vOrtho - hPad) / vSize;
     this.orbit.zoom0 = Math.min(hZoom, vZoom);
 
     // Reset the OrbitControls so the camera will adopt our newly computed view
