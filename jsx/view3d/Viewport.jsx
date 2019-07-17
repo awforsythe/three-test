@@ -37,7 +37,7 @@ class Viewport {
     this.renderer = new Renderer(this.scene, this.camera, width, height);
 
     this.controls = new Controls(this.camera, this.renderer.getDomElement());
-    this.selection = new Selection(this.container);
+    this.selection = new Selection(this.container, this.renderer.outlinePass, this.renderer.outlinePassHover);
 
     this.loader = new GLTFLoader();
 
@@ -85,7 +85,6 @@ class Viewport {
   addNode(options) {
     const node = new SceneNode(this.loader, options);
     this.nodes.push(node);
-    this.renderer.outlinePass.selectedObjects.push(node.root);
     this.scene.add(node.root);
     return node;
   }
@@ -100,7 +99,7 @@ class Viewport {
 
   getSceneBoundingBox() {
     if (this.selection.selectedNode) {
-      return new THREE.Box3().setFromObject(this.selection.selectedNode.box);
+      return new THREE.Box3().setFromObject(this.selection.selectedNode.getCollisionObject());
     }
 
     if (this.nodes.length <= 0) {
@@ -111,7 +110,7 @@ class Viewport {
     let min = new THREE.Vector3(Infinity, Infinity, Infinity);
     let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
     for (const node of this.nodes) {
-      const aabb = new THREE.Box3().setFromObject(node.box);
+      const aabb = new THREE.Box3().setFromObject(node.getCollisionObject());
       if (aabb.min.x < min.x) { min.x = aabb.min.x; }
       if (aabb.min.y < min.y) { min.y = aabb.min.y; }
       if (aabb.min.z < min.z) { min.z = aabb.min.z; }

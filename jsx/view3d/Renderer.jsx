@@ -34,6 +34,13 @@ class Renderer {
     this.outlinePass.edgeStrength = 10.0;
     this.composer.addPass(this.outlinePass);
 
+    this.outlinePassHover = new OutlinePass(new THREE.Vector2(width, height), this.scene, this.camera);
+    this.outlinePassHover.visibleEdgeColor = new THREE.Color(0.0, 0.75, 1.0);
+    this.outlinePassHover.hiddenEdgeColor = new THREE.Color(0.5, 0.875, 1.0);
+    this.outlinePassHover.edgeThickness = 0.025;
+    this.outlinePassHover.edgeStrength = 5.0;
+    this.composer.addPass(this.outlinePassHover);
+
     this.fxaaPass = new ShaderPass(FXAAShader);
     this.fxaaPass.uniforms['resolution'].value.set(1.0 / width, 1.0 / height);
     this.composer.addPass(this.fxaaPass);
@@ -51,16 +58,20 @@ class Renderer {
 
   setCamera(newCamera) {
     if (newCamera !== this.camera) {
-      const prevOrtho = this.camera.isOrthographicCamera;
-      const newOrtho = newCamera.isOrthographicCamera;
+      const prevCamera = this.camera;
       this.camera = newCamera;
+      this.renderPass.camera = newCamera;
+      this.updateOutlinePass(this.outlinePass, prevCamera, newCamera);
+      this.updateOutlinePass(this.outlinePassHover, prevCamera, newCamera);
+    }
+  }
 
-      this.renderPass.camera = this.camera;
-      this.outlinePass.renderCamera = this.camera;
-
-      const maskMaterial = this.outlinePass.prepareMaskMaterial;
-      const oldFunc = newOrtho ? 'perspectiveDepthToViewZ' : 'orthographicDepthToViewZ';
-      const newFunc = newOrtho ? 'orthographicDepthToViewZ' : 'perspectiveDepthToViewZ';
+  updateOutlinePass(pass, prevCamera, newCamera) {
+    pass.renderCamera = newCamera;
+    if (prevCamera.isOrthographicCamera != newCamera.isOrthographicCamera) {
+      const maskMaterial = pass.prepareMaskMaterial;
+      const oldFunc = newCamera.isOrthographicCamera ? 'perspectiveDepthToViewZ' : 'orthographicDepthToViewZ';
+      const newFunc = newCamera.isOrthographicCamera ? 'orthographicDepthToViewZ' : 'perspectiveDepthToViewZ';
       maskMaterial.fragmentShader = maskMaterial.fragmentShader.replace(oldFunc, newFunc);
       maskMaterial.needsUpdate = true;
     }

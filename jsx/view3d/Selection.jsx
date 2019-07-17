@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 
 class Selection {
-  constructor(container) {
+  constructor(container, outlinePass, outlinePassHover) {
     this.container = container;
+    this.outlinePass = outlinePass;
+    this.outlinePassHover = outlinePassHover;
     this.mousePos = new THREE.Vector2();
     this.lastMouseDownPos = new THREE.Vector2();
     this.lastMouseUpPos = new THREE.Vector2();
@@ -61,17 +63,30 @@ class Selection {
               }
               this.selectedNode = this.hoveredNode;
               this.selectedNode.select();
+              this.updateOutlines();
             }
           } else {
             if (this.selectedNode) {
               this.selectedNode.deselect();
               this.selectedNode = null;
+              this.updateOutlines();
             }
           }
         }
       }
     }
   };
+
+  updateOutlines() {
+    this.outlinePass.selectedObjects.length = 0;
+    this.outlinePassHover.selectedObjects.length = 0;
+    if (this.selectedNode) {
+      this.outlinePass.selectedObjects.push(this.selectedNode.root);
+    }
+    if (this.hoveredNode) {
+      this.outlinePassHover.selectedObjects.push(this.hoveredNode.root);
+    }
+  }
 
   update(camera, nodes) {
     let collisionObjects = []
@@ -89,11 +104,13 @@ class Selection {
         }
         this.hoveredNode = node;
         this.hoveredNode.hover();
+        this.updateOutlines();
       }
     } else {
       if (this.hoveredNode) {
         this.hoveredNode.unhover();
         this.hoveredNode = null;
+        this.updateOutlines();
       }
     }
   }

@@ -76,18 +76,7 @@ class SceneNode {
   }
 
   updateBox() {
-    if (this.model) {
-      const aabb = new THREE.Box3().setFromObject(this.model);
-      const extents = aabb.max.sub(aabb.min);
-      this.box.scale.copy(extents);
-
-      const aabbCenter = vec(aabb.min).add(vec(extents).multiplyScalar(0.5));
-      const offset = vec(aabbCenter).sub(this.root.position);
-      this.box.position.copy(offset);
-    } else {
-      this.box.scale.set(1, 1, 1);
-      this.box.position.set(0, 0, 0);
-    }
+    this.box.visible = !this.model;
   }
 
   hover() {
@@ -137,6 +126,7 @@ class SceneNode {
     this.loadingModelUrl = null;
     this.model = gltf.scene;
     this.root.add(this.model);
+
     this.updateBox();
   };
 
