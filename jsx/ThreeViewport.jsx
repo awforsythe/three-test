@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import Button from '@material-ui/core/Button';
+
 import Viewport from './view3d/Viewport.jsx';
 
 class ThreeViewport extends React.Component {
@@ -48,18 +50,34 @@ class ThreeViewport extends React.Component {
   };
 
   render() {
+    const { topLeft, topRight } = this.props;
     return (
       <React.Fragment>
         <div
           ref={this.setDivRef}
-          style={{ height: '70vh', margin: 8, border: '1px solid #999' }}
-        />
+          style={{ height: '80vh', margin: 8, border: '1px solid #999' }}
+        >
+          <div style={{ position: 'relative', height: 0 }}>
+            {topRight && (
+              <div style={{ position: 'absolute', margin: 4, paddingRight: 8, width: '100%', textAlign: 'right' }}>
+                {topRight}
+              </div>
+            )}
+            {topLeft && (
+              <div style={{ position: 'absolute', margin: 4 }}>
+                {topLeft}
+              </div>
+            )}
+          </div>
+        </div>
       </React.Fragment>
     );
   }
 }
 ThreeViewport.propTypes = {
   camera: PropTypes.oneOf(['top', 'persp']).isRequired,
+  topLeft: PropTypes.element,
+  topRight: PropTypes.element,
   onRegister: PropTypes.func,
   onToggleCamera: PropTypes.func,
 };

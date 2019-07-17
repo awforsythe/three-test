@@ -4,6 +4,7 @@ import * as THREE from 'three';
 
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 import ThreeViewport from './ThreeViewport.jsx';
 
@@ -37,22 +38,24 @@ class SceneExplorer extends React.Component {
 
   render() {
     const { camera } = this.state;
+    const cameraButton = (
+      <Button
+        disableRipple
+        style={{ width: 32 }}
+        color="primary"
+        variant="outlined"
+        onClick={this.toggleCamera}
+      >
+        {camera === 'persp' ? '3D' : 'TOP'}
+      </Button>
+    );
     return (
-      <React.Fragment>
-        <Typography variant="h6">Camera: {camera}</Typography>
-        <ThreeViewport
-          camera={camera}
-          onRegister={addTestModels}
-          onToggleCamera={this.toggleCamera}
-        />
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={this.toggleCamera}
-        >
-          Toggle Camera
-        </Button>
-      </React.Fragment>
+      <ThreeViewport
+        camera={camera}
+        onRegister={addTestModels}
+        onToggleCamera={this.toggleCamera}
+        topRight={cameraButton}
+      />
     );
   }
 }

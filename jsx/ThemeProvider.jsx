@@ -81,8 +81,5 @@ function ThemeProvider(props) {
     </React.Fragment>
   );
 }
-ThemeProvider.propTypes = {
-  children: PropTypes.array,
-};
 
 export default ThemeProvider;
