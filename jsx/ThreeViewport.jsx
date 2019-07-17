@@ -17,7 +17,9 @@ class ThreeViewport extends React.Component {
           84: { pressEvent: this.props.onToggleCamera },
         });
         this.viewport.register();
-        this.props.onRegisterViewport(this.viewport);
+        if (this.props.onRegister) {
+          this.props.onRegister(this.viewport);
+        }
       } else {
         console.error('ERROR: Component mounted without valid div ref');
       }
@@ -58,8 +60,8 @@ class ThreeViewport extends React.Component {
 }
 ThreeViewport.propTypes = {
   camera: PropTypes.oneOf(['top', 'persp']).isRequired,
-  onRegisterViewport: PropTypes.func.isRequired,
-  onToggleCamera: PropTypes.func.isRequired,
+  onRegister: PropTypes.func,
+  onToggleCamera: PropTypes.func,
 };
 
 export default ThreeViewport;
