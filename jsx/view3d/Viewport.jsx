@@ -102,8 +102,8 @@ class Viewport {
   }
 
   getSceneBoundingBox() {
-    if (this.selection.selectedNode) {
-      return new THREE.Box3().setFromObject(this.selection.selectedNode.getCollisionObject());
+    if (this.selection.cursor.clicked) {
+      return new THREE.Box3().setFromObject(this.selection.cursor.clicked.getCollisionObject());
     }
 
     if (this.nodes.length <= 0) {

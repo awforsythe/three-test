@@ -150,6 +150,80 @@ class DragContext {
   }
 }
 
+class CursorContext {
+  constructor(container, onHoveredChange, onClickedChange) {
+    this.container = container;
+    this.raycaster = new THREE.Raycaster();
+    this.pos = new THREE.Vector2();
+    this.downPos = new THREE.Vector2();
+    this.upPos = new THREE.Vector2();
+
+    this.hoveredPoint = new THREE.Vector3();
+    this.hovered = null;
+    this.clicked = null;
+
+    this.onHoveredChange = onHoveredChange;
+    this.onClickedChange = onClickedChange;
+  }
+
+  reposition(clientX, clientY, target) {
+    const rect = this.container.getBoundingClientRect();
+    const mouseX = Math.round(clientX - Math.round(rect.left));
+    const mouseY = Math.round(clientY - Math.round(rect.top));
+    const unitX = (mouseX / rect.width) * 2.0 - 1.0;
+    const unitY = -(mouseY / rect.height) * 2.0 + 1.0;
+    if (unitX >= -1.0 && unitX <= 1.0 && unitY >= -1.0 && unitY <= 1.0) {
+      target.x = unitX;
+      target.y = unitY;
+      return true;
+    }
+    return false;
+  }
+
+  updateHovered(camera, nodes) {
+    let objs = [];
+    for (const node of nodes) {
+      objs.push(node.getCollisionObject());
+    }
+
+    this.raycaster.setFromCamera(this.pos, camera);
+    const results = this.raycaster.intersectObjects(objs, true);
+    const node = results.length > 0 ? nodes.find(x => x.isParentTo(results[0].object)) : null;
+    if (node) {
+      this.hoveredPoint.copy(results[0].point);
+    }
+    this._setHovered(node);
+  }
+
+  updateClicked() {
+    const tolerance = 0.025;
+    const toleranceSquared = tolerance * tolerance;
+    if (this.upPos.distanceToSquared(this.downPos) < toleranceSquared) {
+      this._setClicked(this.hovered);
+    }
+  }
+
+  _setHovered(node) {
+    if (node !== this.hovered) {
+      const prev = this.hovered;
+      this.hovered = node;
+      if (this.onHoveredChange) {
+        this.onHoveredChange(prev, this.hovered);
+      }
+    }
+  }
+
+  _setClicked(node) {
+    if (node !== this.clicked) {
+      const prev = this.clicked;
+      this.clicked = node;
+      if (this.onClickedChange) {
+        this.onClickedChange(prev, this.clicked);
+      }
+    }
+  }
+}
+
 class Selection {
   constructor(camera, container, outlinePass, outlinePassHover, onCanUndoDragChanged) {
     this.camera = camera;
@@ -157,17 +231,10 @@ class Selection {
     this.outlinePass = outlinePass;
     this.outlinePassHover = outlinePassHover;
 
+    this.cursor = new CursorContext(this.container, this.onHoveredChange, this.onClickedChange)
+
     this.drag = new DragContext(this.camera, onCanUndoDragChanged);
     this.drag.enabled = this.camera.isOrthographicCamera;
-
-    this.mousePos = new THREE.Vector2();
-    this.lastMouseDownPos = new THREE.Vector2();
-    this.lastMouseUpPos = new THREE.Vector2();
-    this.raycaster = new THREE.Raycaster();
-    this.hoveredNode = null;
-    this.hoveredNodeIntersectPoint = new THREE.Vector3();
-    this.selectedNode = null;
-
   }
 
   register() {
@@ -190,100 +257,60 @@ class Selection {
     }
   }
 
-  updateMousePos(clientX, clientY, target) {
-    const rect = this.container.getBoundingClientRect();
-    const mouseX = Math.round(clientX - Math.round(rect.left));
-    const mouseY = Math.round(clientY - Math.round(rect.top));
-    const unitX = (mouseX / rect.width) * 2.0 - 1.0;
-    const unitY = -(mouseY / rect.height) * 2.0 + 1.0;
-    if (unitX >= -1.0 && unitX <= 1.0 && unitY >= -1.0 && unitY <= 1.0) {
-      target.x = unitX;
-      target.y = unitY;
-      return true;
-    }
-    return false;
-  }
-
   onMouseMove = (event) => {
+    const { cursor, drag } = this;
     event.preventDefault();
-    if (this.updateMousePos(event.clientX, event.clientY, this.mousePos)) {
-      if (this.drag.current) {
-        this.drag.update(this.mousePos);
+    if (cursor.reposition(event.clientX, event.clientY, cursor.pos)) {
+      if (drag.current) {
+        drag.update(cursor.pos);
       }
     }
   };
 
   onMouseDown = (event) => {
+    const { cursor, drag } = this;
     if (event.target.parentNode === this.container) {
-      this.updateMousePos(event.clientX, event.clientY, this.lastMouseDownPos);
-      if (this.drag.enabled && !this.drag.current && this.hoveredNode) {
-        this.drag.start(this.hoveredNode, this.hoveredNodeIntersectPoint);
+      cursor.reposition(event.clientX, event.clientY, cursor.downPos);
+      if (drag.enabled && !drag.current && cursor.hovered) {
+        drag.start(cursor.hovered, cursor.hoveredPoint);
       }
     }
   };
 
   onMouseUp = (event) => {
+    const { cursor, drag } = this;
     const onCanvas = event.target.parentNode === this.container;
-    const inCanvasBounds = this.updateMousePos(event.clientX, event.clientY, this.lastMouseUpPos);
-    if (this.drag.current) {
+    const inCanvasBounds = cursor.reposition(event.clientX, event.clientY, cursor.upPos);
+
+    if (drag.current) {
       if (inCanvasBounds) {
-        this.drag.finish();
+        drag.finish();
       } else {
-        this.drag.cancel();
+        drag.cancel();
       }
     }
 
     if (onCanvas && inCanvasBounds) {
-      const xDelta = Math.abs(this.lastMouseUpPos.x - this.lastMouseDownPos.x);
-      const yDelta = Math.abs(this.lastMouseUpPos.y - this.lastMouseDownPos.y);
-      if (xDelta < 0.05 && yDelta < 0.05) {
-        if (this.hoveredNode) {
-          if (this.hoveredNode !== this.selectedNode) {
-            this.selectedNode = this.hoveredNode;
-            this.updateOutlines();
-          }
-        } else {
-          if (this.selectedNode) {
-            this.selectedNode = null;
-            this.updateOutlines();
-          }
-        }
-      }
+      cursor.updateClicked();
     }
   };
 
-  updateOutlines() {
-    this.outlinePass.selectedObjects.length = 0;
+  onHoveredChange = (prev, next) => {
     this.outlinePassHover.selectedObjects.length = 0;
-    if (this.selectedNode) {
-      this.outlinePass.selectedObjects.push(this.selectedNode.root);
+    if (next) {
+      this.outlinePassHover.selectedObjects.push(next.root);
     }
-    if (this.hoveredNode) {
-      this.outlinePassHover.selectedObjects.push(this.hoveredNode.root);
+  };
+
+  onClickedChange = (prev, next) => {
+    this.outlinePass.selectedObjects.length = 0;
+    if (next) {
+      this.outlinePass.selectedObjects.push(next.root);
     }
-  }
+  };
 
   update(nodes) {
-    let collisionObjects = []
-    for (const node of nodes) {
-      collisionObjects.push(node.getCollisionObject());
-    }
-    this.raycaster.setFromCamera(this.mousePos, this.camera);
-
-    const results = this.raycaster.intersectObjects(collisionObjects, true);
-    const node = results.length > 0 ? nodes.find(x => x.isParentTo(results[0].object)) : null;
-    if (node) {
-      if (node !== this.hoveredNode) {
-        this.hoveredNode = node;
-        this.updateOutlines();
-      }
-      this.hoveredNodeIntersectPoint.copy(results[0].point);
-    } else {
-      if (this.hoveredNode) {
-        this.hoveredNode = null;
-        this.updateOutlines();
-      }
-    }
+    this.cursor.updateHovered(this.camera, nodes);
   }
 }
 
