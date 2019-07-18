@@ -6,6 +6,27 @@ import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 
+class SelectionOutlines {
+  constructor(hoveredPass, clickedPass) {
+    this.hoveredPass = hoveredPass;
+    this.clickedPass = clickedPass;
+  }
+
+  onHoveredChange = (prev, next) => {
+    this.hoveredPass.selectedObjects.length = 0;
+    if (next) {
+      this.hoveredPass.selectedObjects.push(next.root);
+    }
+  };
+
+  onClickedChange = (prev, next) => {
+    this.clickedPass.selectedObjects.length = 0;
+    if (next) {
+      this.clickedPass.selectedObjects.push(next.root);
+    }
+  };
+}
+
 class Renderer {
   constructor(scene, camera, width, height) {
     this.scene = scene;
@@ -19,6 +40,7 @@ class Renderer {
     this.renderer.shadowMap.enabled = true;
 
     this.initPasses(width, height);
+    this.outlines = new SelectionOutlines(this.outlinePassHover, this.outlinePass);
   }
 
   initPasses(width, height) {

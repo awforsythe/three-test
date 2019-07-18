@@ -225,14 +225,10 @@ class CursorContext {
 }
 
 class Selection {
-  constructor(camera, container, outlinePass, outlinePassHover, onCanUndoDragChanged) {
+  constructor(camera, container, onHoveredChange, onClickedChange, onCanUndoDragChanged) {
     this.camera = camera;
     this.container = container;
-    this.outlinePass = outlinePass;
-    this.outlinePassHover = outlinePassHover;
-
-    this.cursor = new CursorContext(this.container, this.onHoveredChange, this.onClickedChange)
-
+    this.cursor = new CursorContext(this.container, onHoveredChange, onClickedChange)
     this.drag = new DragContext(this.camera, onCanUndoDragChanged);
     this.drag.enabled = this.camera.isOrthographicCamera;
   }
@@ -292,20 +288,6 @@ class Selection {
 
     if (onCanvas && inCanvasBounds) {
       cursor.updateClicked();
-    }
-  };
-
-  onHoveredChange = (prev, next) => {
-    this.outlinePassHover.selectedObjects.length = 0;
-    if (next) {
-      this.outlinePassHover.selectedObjects.push(next.root);
-    }
-  };
-
-  onClickedChange = (prev, next) => {
-    this.outlinePass.selectedObjects.length = 0;
-    if (next) {
-      this.outlinePass.selectedObjects.push(next.root);
     }
   };
 

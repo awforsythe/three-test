@@ -37,7 +37,7 @@ class Viewport {
     this.renderer = new Renderer(this.scene, this.camera, width, height);
 
     this.controls = new Controls(this.camera, this.renderer.getDomElement());
-    this.selection = new Selection(this.camera, this.container, this.renderer.outlinePass, this.renderer.outlinePassHover, onCanUndoChanged);
+    this.selection = new Selection(this.camera, this.container, this.renderer.outlines.onHoveredChange, this.renderer.outlines.onClickedChange, onCanUndoChanged);
     this.selection.dragEnabled = this.camera === this.topCamera;
 
     this.loader = new GLTFLoader();
