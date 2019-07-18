@@ -89,25 +89,22 @@ class UndoStack {
 }
 
 class DragContext {
-  constructor(camera, onCanUndoChange) {
-    this.camera = camera;
+  constructor(switcher, onCanUndoChange) {
+    this.switcher = switcher;
     this.current = null;
     this.undoStack = new UndoStack(onCanUndoChange);
     this.enabled = true;
+
+    this.switcher.onSwitch.push(this.handleCameraSwitch);
   }
 
-  setCamera(newCamera) {
-    if (newCamera !== this.camera) {
-      if (this.current) {
-        this.cancel();
-      }
-      this.camera = newCamera;
-    }
-  }
+  handleCameraSwitch = (oldCamera, newCamera) => {
+    this.cancel();
+  };
 
   start(node, intersectPoint) {
     if (!this.current) {
-      const operation = new DragOperation(node, this.camera);
+      const operation = new DragOperation(node, this.switcher.current);
       if (operation.start(intersectPoint)) {
         this.current = operation;
       }
@@ -167,7 +164,7 @@ class CursorContext {
   }
 
   reposition(clientX, clientY, target) {
-    const rect = this.container.getBoundingClientRect();
+    const rect = this.container.div.getBoundingClientRect();
     const mouseX = Math.round(clientX - Math.round(rect.left));
     const mouseY = Math.round(clientY - Math.round(rect.top));
     const unitX = (mouseX / rect.width) * 2.0 - 1.0;
@@ -225,12 +222,14 @@ class CursorContext {
 }
 
 class Selection {
-  constructor(camera, container, onHoveredChange, onClickedChange, onCanUndoDragChanged) {
-    this.camera = camera;
+  constructor(container, switcher, onHoveredChange, onClickedChange, onCanUndoDragChanged) {
     this.container = container;
+    this.switcher = switcher;
     this.cursor = new CursorContext(this.container, onHoveredChange, onClickedChange)
-    this.drag = new DragContext(this.camera, onCanUndoDragChanged);
-    this.drag.enabled = this.camera.isOrthographicCamera;
+    this.drag = new DragContext(this.switcher, onCanUndoDragChanged);
+    this.drag.enabled = this.switcher.current.isOrthographicCamera;
+
+    this.switcher.onSwitch.push(this.handleCameraSwitch);
   }
 
   register() {
@@ -245,13 +244,9 @@ class Selection {
     document.removeEventListener('mouseup', this.onMouseUp);
   }
 
-  setCamera(newCamera) {
-    if (this.camera !== newCamera) {
-      this.camera = newCamera;
-      this.drag.setCamera(this.camera);
-      this.drag.enabled = this.camera.isOrthographicCamera;
-    }
-  }
+  handleCameraSwitch = (oldCamera, newCamera) => {
+    this.drag.enabled = newCamera.isOrthographicCamera;
+  };
 
   onMouseMove = (event) => {
     const { cursor, drag } = this;
@@ -265,7 +260,7 @@ class Selection {
 
   onMouseDown = (event) => {
     const { cursor, drag } = this;
-    if (event.target.parentNode === this.container) {
+    if (event.target.parentNode === this.container.div) {
       cursor.reposition(event.clientX, event.clientY, cursor.downPos);
       if (drag.enabled && !drag.current && cursor.hovered) {
         drag.start(cursor.hovered, cursor.hoveredPoint);
@@ -275,7 +270,7 @@ class Selection {
 
   onMouseUp = (event) => {
     const { cursor, drag } = this;
-    const onCanvas = event.target.parentNode === this.container;
+    const onCanvas = event.target.parentNode === this.container.div;
     const inCanvasBounds = cursor.reposition(event.clientX, event.clientY, cursor.upPos);
 
     if (drag.current) {
@@ -292,7 +287,7 @@ class Selection {
   };
 
   update(nodes) {
-    this.cursor.updateHovered(this.camera, nodes);
+    this.cursor.updateHovered(this.switcher.current, nodes);
   }
 }
 

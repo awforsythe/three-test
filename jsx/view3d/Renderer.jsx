@@ -12,51 +12,78 @@ class SelectionOutlines {
     this.clickedPass = clickedPass;
   }
 
-  onHoveredChange = (prev, next) => {
+  onHoveredChange = (oldNode, newNode) => {
     this.hoveredPass.selectedObjects.length = 0;
-    if (next) {
-      this.hoveredPass.selectedObjects.push(next.root);
+    if (newNode) {
+      this.hoveredPass.selectedObjects.push(newNode.root);
     }
   };
 
-  onClickedChange = (prev, next) => {
+  onClickedChange = (oldNode, newNode) => {
     this.clickedPass.selectedObjects.length = 0;
-    if (next) {
-      this.clickedPass.selectedObjects.push(next.root);
+    if (newNode) {
+      this.clickedPass.selectedObjects.push(newNode.root);
     }
   };
 }
 
 class Renderer {
-  constructor(scene, camera, width, height) {
+  constructor(container, switcher, scene) {
+    this.container = container;
+    this.switcher = switcher;
     this.scene = scene;
-    this.camera = camera;
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(width, height);
+    this.renderer.setSize(this.container.width, this.container.height);
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
     this.renderer.shadowMap.enabled = true;
 
-    this.initPasses(width, height);
+    this.initPasses();
     this.outlines = new SelectionOutlines(this.outlinePassHover, this.outlinePass);
+
+    this.container.onResize.push(this.handleContainerResize);
+    this.switcher.onSwitch.push(this.handleCameraSwitch);
   }
 
-  initPasses(width, height) {
+  register() {
+    this.container.div.appendChild(this.renderer.domElement);
+  }
+
+  unregister() {
+    this.container.div.removeChild(this.renderer.domElement);
+  }
+
+  handleContainerResize = (width, height, aspect) => {
+    this.renderer.setSize(width, height);
+    this.composer.setSize(width, height);
+    this.fxaaPass.uniforms['resolution'].value.set(1.0 / width, 1.0 / height);
+  };
+
+  handleCameraSwitch = (oldCamera, newCamera) => {
+    this.renderPass.camera = newCamera;
+    this.updateOutlinePass(this.outlinePass, oldCamera, newCamera);
+    this.updateOutlinePass(this.outlinePassHover, oldCamera, newCamera);
+  };
+
+  initPasses() {
+    const width = this.container.width;
+    const height = this.container.height;
+
     this.composer = new EffectComposer(this.renderer);
 
-    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.renderPass = new RenderPass(this.scene, this.switcher.current);
     this.composer.addPass(this.renderPass);
 
-    this.outlinePass = new OutlinePass(new THREE.Vector2(width, height), this.scene, this.camera);
+    this.outlinePass = new OutlinePass(new THREE.Vector2(width, height), this.scene, this.switcher.current);
     this.outlinePass.visibleEdgeColor = new THREE.Color(1.0, 0.75, 0.0);
     this.outlinePass.hiddenEdgeColor = new THREE.Color(1.0, 0.875, 0.5);
     this.outlinePass.edgeThickness = 0.25;
     this.outlinePass.edgeStrength = 10.0;
     this.composer.addPass(this.outlinePass);
 
-    this.outlinePassHover = new OutlinePass(new THREE.Vector2(width, height), this.scene, this.camera);
+    this.outlinePassHover = new OutlinePass(new THREE.Vector2(width, height), this.scene, this.switcher.current);
     this.outlinePassHover.visibleEdgeColor = new THREE.Color(0.0, 0.75, 1.0);
     this.outlinePassHover.hiddenEdgeColor = new THREE.Color(0.5, 0.875, 1.0);
     this.outlinePassHover.edgeThickness = 0.025;
@@ -70,22 +97,6 @@ class Renderer {
 
   getDomElement() {
     return this.renderer.domElement;
-  }
-
-  onResize(width, height) {
-    this.renderer.setSize(width, height);
-    this.composer.setSize(width, height);
-    this.fxaaPass.uniforms['resolution'].value.set(1.0 / width, 1.0 / height);
-  }
-
-  setCamera(newCamera) {
-    if (newCamera !== this.camera) {
-      const prevCamera = this.camera;
-      this.camera = newCamera;
-      this.renderPass.camera = newCamera;
-      this.updateOutlinePass(this.outlinePass, prevCamera, newCamera);
-      this.updateOutlinePass(this.outlinePassHover, prevCamera, newCamera);
-    }
   }
 
   updateOutlinePass(pass, prevCamera, newCamera) {
