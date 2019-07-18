@@ -139,7 +139,7 @@ class Viewport {
   };
 
   undoLastMove = () => {
-    this.selection.undoDrag();
+    this.selection.drag.undo();
   };
 
   onWindowResize = () => {

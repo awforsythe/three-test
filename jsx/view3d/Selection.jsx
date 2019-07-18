@@ -1,12 +1,164 @@
 import * as THREE from 'three';
 
+class DragOperation {
+  constructor(node, camera) {
+    this.node = node;
+    this.camera = camera;
+
+    this.worldStart = new THREE.Vector3();
+    this.worldFinish = new THREE.Vector3();
+    this.raycaster = new THREE.Raycaster();
+    this.plane = new THREE.Plane();
+    this.intersection = new THREE.Vector3();
+    this.offset = new THREE.Vector3();
+  }
+
+  start(intersectPoint) {
+    this.worldStart.copy(this.node.root.position);
+    this.plane.setFromNormalAndCoplanarPoint(this.camera.getWorldDirection(this.plane.normal), this.worldStart);
+
+    this.raycaster.set(intersectPoint, this.plane.normal);
+    if (this.raycaster.ray.intersectPlane(this.plane, this.intersection)) {
+      this.offset.copy(this.intersection).sub(this.worldStart);
+      return true;
+    }
+    return false;
+  }
+
+  update(mousePos) {
+    this.raycaster.setFromCamera(mousePos, this.camera);
+    if (this.raycaster.ray.intersectPlane(this.plane, this.intersection)) {
+      this.node.setPosition(this.intersection.sub(this.offset));
+    }
+  }
+
+  finish() {
+    this.worldFinish.copy(this.node.root.position);
+    if (this.worldFinish.distanceToSquared(this.worldStart) > 0.001) {
+      return true;
+    }
+    return false;
+  }
+
+  reset() {
+    this.node.setPosition(this.worldStart);
+  }
+}
+
+
+class UndoStack {
+  constructor(onChange) {
+    this.operations = [];
+    this.onChange = onChange;
+  }
+
+  push(operation) {
+    this.operations.push(operation);
+    if (this.onChange && this.operations.length === 1) {
+      this.onChange(true);
+    }
+  }
+
+  pop() {
+    if (this.onChange && this.operations.length === 1) {
+      this.onChange(false);
+    }
+    return this.operations.pop();
+  }
+
+  pause() {
+    if (this.onChange && this.operations.length > 0) {
+      this.onChange(false);
+    }
+  }
+
+  resume() {
+    if (this.onChange && this.operations.length > 0) {
+      this.onChange(true);
+    }
+  }
+
+  clear() {
+    if (this.operations.length > 0) {
+      this.operations.length = 0;
+      if (this.onChange) {
+        this.onChange(false);
+      }
+    }
+  }
+}
+
+class DragContext {
+  constructor(camera, onCanUndoChange) {
+    this.camera = camera;
+    this.current = null;
+    this.undoStack = new UndoStack(onCanUndoChange);
+    this.enabled = true;
+  }
+
+  setCamera(newCamera) {
+    if (newCamera !== this.camera) {
+      if (this.current) {
+        this.cancel();
+      }
+      this.camera = newCamera;
+    }
+  }
+
+  start(node, intersectPoint) {
+    if (!this.current) {
+      const operation = new DragOperation(node, this.camera);
+      if (operation.start(intersectPoint)) {
+        this.current = operation;
+      }
+    }
+  }
+
+  update(mousePos) {
+    if (this.current) {
+      this.current.update(mousePos);
+    }
+  }
+
+  finish() {
+    if (this.current) {
+      if (this.current.finish()) {
+        this.undoStack.push(this.current);
+        this.current = null;
+      } else {
+        this.cancel();
+      }
+    }
+  }
+
+  cancel() {
+    if (this.current) {
+      this.current.reset();
+      this.current = null;
+    }
+  }
+
+  undo() {
+    if (this.undoStack.operations.length > 0) {
+      const operation = this.undoStack.pop();
+      if (operation.node.alive && operation.node.root.position.distanceToSquared(operation.worldFinish) < 0.001) {
+        operation.reset();
+      } else {
+        this.undoStack.clear();
+      }
+    }
+  }
+}
+
 class Selection {
   constructor(camera, container, outlinePass, outlinePassHover, onCanUndoDragChanged) {
     this.camera = camera;
     this.container = container;
     this.outlinePass = outlinePass;
     this.outlinePassHover = outlinePassHover;
-    this.onCanUndoDragChanged = onCanUndoDragChanged;
+
+    this.drag = new DragContext(this.camera, onCanUndoDragChanged);
+    this.drag.enabled = this.camera.isOrthographicCamera;
 
     this.mousePos = new THREE.Vector2();
     this.lastMouseDownPos = new THREE.Vector2();
@@ -16,16 +168,6 @@ class Selection {
     this.hoveredNodeIntersectPoint = new THREE.Vector3();
     this.selectedNode = null;
 
-    this.dragEnabled = this.camera.isOrthographicCamera;
-    this.draggingNode = null;
-    this.dragStartWorldPos = new THREE.Vector3();
-    this.dragEndWorldPos = new THREE.Vector3();
-    this.lastDragNode = null;
-    this.canUndoDrag = false;
-
-    this.dragPlane = new THREE.Plane();
-    this.dragOffset = new THREE.Vector3();
-    this.dragIntersection = new THREE.Vector3();
   }
 
   register() {
@@ -43,61 +185,8 @@ class Selection {
   setCamera(newCamera) {
     if (this.camera !== newCamera) {
       this.camera = newCamera;
-      this.dragEnabled = this.camera.isOrthographicCamera;
-      if (this.draggingNode && !this.dragEnabled) {
-        this.cancelDrag();
-      }
-    }
-  }
-
-  setCanUndoDrag(newValue) {
-    if (this.canUndoDrag !== newValue) {
-      this.canUndoDrag = newValue;
-      if (this.onCanUndoDragChanged) {
-        this.onCanUndoDragChanged(this.canUndoDrag);
-      }
-    }
-  }
-
-  startDrag() {
-    this.setCanUndoDrag(false);
-    this.draggingNode = this.hoveredNode;
-    this.dragStartWorldPos.copy(this.draggingNode.root.position);
-    this.dragPlane.setFromNormalAndCoplanarPoint(this.camera.getWorldDirection(this.dragPlane.normal), this.dragStartWorldPos);
-
-    this.raycaster.set(this.hoveredNodeIntersectPoint, this.dragPlane.normal);
-    if (this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection)) {
-      this.dragOffset.copy(this.dragIntersection).sub(this.dragStartWorldPos);
-    } else {
-      this.draggingNode = null;
-    }
-  }
-
-  endDrag() {
-    this.dragEndWorldPos.copy(this.draggingNode.root.position);
-    this.lastDragNode = this.draggingNode;
-    this.draggingNode = null;
-    this.setCanUndoDrag(true);
-  }
-
-  cancelDrag() {
-    this.draggingNode.setPosition(this.dragStartWorldPos);
-    this.draggingNode = null;
-  }
-
-  undoDrag() {
-    if (this.canUndoDrag) {
-      if (this.lastDragNode) {
-        this.lastDragNode.setPosition(this.dragStartWorldPos);
-      }
-      this.setCanUndoDrag(false);
-    }
-  }
-
-  updateDrag() {
-    this.raycaster.setFromCamera(this.mousePos, this.camera);
-    if (this.raycaster.ray.intersectPlane(this.dragPlane, this.dragIntersection)) {
-      this.draggingNode.setPosition(this.dragIntersection.sub(this.dragOffset));
+      this.drag.setCamera(this.camera);
+      this.drag.enabled = this.camera.isOrthographicCamera;
     }
   }
 
@@ -118,8 +207,8 @@ class Selection {
   onMouseMove = (event) => {
     event.preventDefault();
     if (this.updateMousePos(event.clientX, event.clientY, this.mousePos)) {
-      if (this.draggingNode) {
-        this.updateDrag();
+      if (this.drag.current) {
+        this.drag.update(this.mousePos);
       }
     }
   };
@@ -127,8 +216,8 @@ class Selection {
   onMouseDown = (event) => {
     if (event.target.parentNode === this.container) {
       this.updateMousePos(event.clientX, event.clientY, this.lastMouseDownPos);
-      if (this.dragEnabled && !this.draggingNode && this.hoveredNode) {
-        this.startDrag();
+      if (this.drag.enabled && !this.drag.current && this.hoveredNode) {
+        this.drag.start(this.hoveredNode, this.hoveredNodeIntersectPoint);
       }
     }
   };
@@ -136,12 +225,11 @@ class Selection {
   onMouseUp = (event) => {
     const onCanvas = event.target.parentNode === this.container;
     const inCanvasBounds = this.updateMousePos(event.clientX, event.clientY, this.lastMouseUpPos);
-    if (this.draggingNode) {
-      this.dragEndWorldPos.copy(this.draggingNode.root.position);
-      if (inCanvasBounds && this.dragEndWorldPos.distanceToSquared(this.dragStartWorldPos) > 0.001) {
-        this.endDrag();
+    if (this.drag.current) {
+      if (inCanvasBounds) {
+        this.drag.finish();
       } else {
-        this.cancelDrag();
+        this.drag.cancel();
       }
     }
 
@@ -151,7 +239,6 @@ class Selection {
       if (xDelta < 0.05 && yDelta < 0.05) {
         if (this.hoveredNode) {
           if (this.hoveredNode !== this.selectedNode) {
-            this.setCanUndoDrag(false);
             this.selectedNode = this.hoveredNode;
             this.updateOutlines();
           }

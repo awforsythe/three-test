@@ -10,6 +10,7 @@ class SceneNode {
     this.hovered = false;
     this.selected = false;
     this.root = new THREE.Group();
+    this.alive = true;
 
     this.model = null;
     this.loadedModelUrl = null;
