@@ -12,7 +12,7 @@ import SceneNode from './SceneNode.jsx';
 const FRUSTUM_SIZE = 15.0;
 
 class Viewport {
-  constructor(container, hotkeyMappings, options) {
+  constructor(container, cameraType, hotkeyMappings) {
     THREE.Cache.enabled = true;
 
     this.container = container;
@@ -29,7 +29,7 @@ class Viewport {
     this.perspCamera = new THREE.PerspectiveCamera(55, aspect, 1.0, 8000.0);
     this.topCamera = new THREE.OrthographicCamera(FRUSTUM_SIZE * aspect * -0.5, FRUSTUM_SIZE * aspect * 0.5, FRUSTUM_SIZE * 0.5, FRUSTUM_SIZE * -0.5, 1.0, 1000.0);
     this.topCamera.position.set(0, 5, 0);
-    this.camera = options.cameraType === 'top' ? this.topCamera : this.perspCamera;
+    this.camera = cameraType === 'top' ? this.topCamera : this.perspCamera;
 
     this.scene = new THREE.Scene();
     this.environment = new Environment(this.scene);
