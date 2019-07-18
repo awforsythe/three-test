@@ -15,7 +15,7 @@ class ThreeViewport extends React.Component {
   componentDidMount() {
     if (!this.viewport) {
       if (this.divRef) {
-        this.viewport = new Viewport(this.divRef, this.props.camera, {
+        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, {
           84: { pressEvent: this.props.onToggleCamera },
           70: { pressEvent: this.props.onFrameScene },
         });
@@ -46,6 +46,9 @@ class ThreeViewport extends React.Component {
     }
     if (this.props.frameSceneCount !== prevProps.frameSceneCount) {
       this.viewport.frameSelection();
+    }
+    if (this.props.undoCount !== prevProps.undoCount) {
+      this.viewport.undoLastMove();
     }
   }
 
@@ -82,6 +85,8 @@ class ThreeViewport extends React.Component {
 ThreeViewport.propTypes = {
   camera: PropTypes.oneOf(['top', 'persp']).isRequired,
   frameSceneCount: PropTypes.number.isRequired,
+  undoCount: PropTypes.number.isRequired,
+  onCanUndoChanged: PropTypes.func,
   topLeft: PropTypes.element,
   topRight: PropTypes.element,
   onRegister: PropTypes.func,

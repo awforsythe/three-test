@@ -36,7 +36,8 @@ class SceneExplorer extends React.Component {
     this.state = {
       camera: 'persp',
       frameSceneCount: 0,
-      yPos: 1.0,
+      undoCount: 0,
+      canUndo: false,
     };
   }
 
@@ -45,14 +46,8 @@ class SceneExplorer extends React.Component {
     this.forceUpdate();
   };
 
-  nudgeTestModelUp = () => {
-    const { yPos } = this.state;
-    this.setState({ yPos: yPos + 0.1 });
-  };
-
-  nudgeTestModelDown = () => {
-    const { yPos } = this.state;
-    this.setState({ yPos: yPos - 0.1 });
+  onCanUndoChanged = (canUndo) => {
+    this.setState({ canUndo });
   };
 
   toggleCamera = () => {
@@ -65,22 +60,20 @@ class SceneExplorer extends React.Component {
     this.setState({ frameSceneCount: frameSceneCount + 1 });
   };
 
+  undoLastMove = () => {
+    const { undoCount } = this.state;
+    this.setState({ undoCount: undoCount + 1 });
+  };
+
   render() {
-    const { camera, frameSceneCount, yPos } = this.state;
-    const nudgeButtons = (
-      <div>
-        <ViewportButton
-          label="Up"
-          style={{ width: 32 }}
-          onClick={this.nudgeTestModelUp}
-        />
-        <ViewportButton
-          label="Down"
-          style={{ width: 32, marginLeft: 4 }}
-          onClick={this.nudgeTestModelDown}
-        />
-      </div>
-    );
+    const { camera, frameSceneCount, undoCount, canUndo } = this.state;
+    const undoButton = canUndo ? (
+      <ViewportButton
+        label="Undo"
+        style={{ width: 32 }}
+        onClick={this.undoLastMove}
+      />
+    ) : null;
     const controls = (
       <div>
         <ViewportButton
@@ -99,15 +92,17 @@ class SceneExplorer extends React.Component {
       <ThreeViewport
         camera={camera}
         frameSceneCount={frameSceneCount}
+        undoCount={undoCount}
         onRegister={this.onViewportRegister}
+        onCanUndoChanged={this.onCanUndoChanged}
         onToggleCamera={this.toggleCamera}
         onFrameScene={this.frameScene}
-        topLeft={nudgeButtons}
+        topLeft={undoButton}
         topRight={controls}
       >
         <ThreeSceneNode
           viewport={this.viewport}
-          xPos={0.0} yPos={yPos} zPos={0.0}
+          xPos={0.0} yPos={1.0} zPos={0.0}
           modelUrl="/models/DamagedHelmet.glb"
         />
         <ThreeSceneNode

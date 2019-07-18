@@ -12,7 +12,7 @@ import SceneNode from './SceneNode.jsx';
 const FRUSTUM_SIZE = 15.0;
 
 class Viewport {
-  constructor(container, cameraType, hotkeyMappings) {
+  constructor(container, cameraType, onCanUndoChanged, hotkeyMappings) {
     THREE.Cache.enabled = true;
 
     this.container = container;
@@ -37,7 +37,8 @@ class Viewport {
     this.renderer = new Renderer(this.scene, this.camera, width, height);
 
     this.controls = new Controls(this.camera, this.renderer.getDomElement());
-    this.selection = new Selection(this.container, this.renderer.outlinePass, this.renderer.outlinePassHover);
+    this.selection = new Selection(this.camera, this.container, this.renderer.outlinePass, this.renderer.outlinePassHover, onCanUndoChanged);
+    this.selection.dragEnabled = this.camera === this.topCamera;
 
     this.loader = new GLTFLoader();
 
@@ -133,7 +134,12 @@ class Viewport {
     this.camera = this.camera === this.perspCamera ? this.topCamera : this.perspCamera;
     this.controls.setCamera(this.camera);
     this.renderer.setCamera(this.camera);
+    this.selection.setCamera(this.camera);
     this.frameSelection();
+  };
+
+  undoLastMove = () => {
+    this.selection.undoDrag();
   };
 
   onWindowResize = () => {
@@ -157,7 +163,7 @@ class Viewport {
     if (this.registered) {
       requestAnimationFrame(this.animate);
       this.controls.update();
-      this.selection.update(this.camera, this.nodes);
+      this.selection.update(this.nodes);
       this.renderer.render();
     }
   };
