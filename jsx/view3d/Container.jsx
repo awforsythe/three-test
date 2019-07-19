@@ -8,7 +8,7 @@ class Container {
     this.aspect = this.width / this.height;
   }
 
-  recompute() {
+  recompute = () => {
     if (this.width !== this.div.clientWidth || this.height !== this.div.clientHeight) {
       this.width = this.div.clientWidth;
       this.height = this.div.clientHeight;
@@ -18,7 +18,7 @@ class Container {
         func(this.width, this.height, this.aspect);
       }
     }
-  }
+  };
 }
 
 export default Container;
