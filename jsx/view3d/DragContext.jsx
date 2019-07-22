@@ -86,6 +86,19 @@ class UndoStack {
       }
     }
   }
+
+  removeNode(node) {
+    if (this.operations.length > 0) {
+      for (let i = this.operations.length - 1; i >= 0; i--) {
+        if (this.operations[i].node === node) {
+          this.operations.splice(i, 1);
+        }
+      }
+      if (this.operations.length === 0) {
+        this.onChange(false);
+      }
+    }
+  }
 }
 
 class DragContext {

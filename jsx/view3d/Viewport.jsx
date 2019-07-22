@@ -88,6 +88,7 @@ class Viewport {
   }
 
   removeNode(node) {
+    this.selection.drag.undoStack.removeNode(node);
     const index = this.nodes.findIndex(x => x == node);
     if (index >= 0) {
       this.nodes.splice(index, 1);
