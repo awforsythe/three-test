@@ -80,7 +80,7 @@ class Selection {
       if (addMode) {
         addCursor.root.visible = true;
       }
-    } else if (addMode) {
+    } else if (addMode && onCanvas) {
       if (this.onAddClick) {
         const pos = this.addCursor.root.position;
         this.onAddClick(pos.x, pos.y, pos.z);
