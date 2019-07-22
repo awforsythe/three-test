@@ -40,6 +40,7 @@ class SceneExplorer extends React.Component {
       frameSceneCount: 0,
       undoCount: 0,
       canUndo: false,
+      addMode: false,
     };
   }
 
@@ -52,9 +53,22 @@ class SceneExplorer extends React.Component {
     this.setState({ canUndo });
   };
 
+  onAddNodeClick = (xPos, yPos, zPos) => {
+    this.setState({ addMode: false });
+    console.log(`Add node at ${xPos.toPrecision(2)}, ${yPos.toPrecision(2)}, ${zPos.toPrecision(2)}`);
+  };
+
   toggleCamera = () => {
     const { camera } = this.state;
-    this.setState({ camera: camera === 'persp' ? 'top' : 'persp' });
+    this.setState({
+      camera: camera === 'persp' ? 'top' : 'persp',
+      addMode: false,
+    });
+  };
+
+  toggleAddMode = () => {
+    const { addMode } = this.state;
+    this.setState({ addMode: !addMode });
   };
 
   frameScene = () => {
@@ -68,7 +82,7 @@ class SceneExplorer extends React.Component {
   };
 
   render() {
-    const { camera, frameSceneCount, undoCount, canUndo } = this.state;
+    const { camera, frameSceneCount, undoCount, canUndo, addMode } = this.state;
     const { nodes } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
@@ -91,17 +105,27 @@ class SceneExplorer extends React.Component {
         />
       </div>
     );
+    const addButton = camera === 'top' ? (
+      <ViewportButton
+        label={addMode ? 'CANCEL' : 'ADD'}
+        style={{ width: 32 }}
+        onClick={this.toggleAddMode}
+      />
+    ) : null;
     return (
       <ThreeViewport
         camera={camera}
         frameSceneCount={frameSceneCount}
         undoCount={undoCount}
+        addMode={addMode}
         onRegister={this.onViewportRegister}
         onCanUndoChanged={this.onCanUndoChanged}
+        onAddNodeClick={this.onAddNodeClick}
         onToggleCamera={this.toggleCamera}
         onFrameScene={this.frameScene}
         topLeft={undoButton}
         topRight={controls}
+        bottomRight={addButton}
       >
         {nodes.map(node => (
           <ThreeSceneNode

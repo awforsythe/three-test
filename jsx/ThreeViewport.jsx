@@ -15,7 +15,7 @@ class ThreeViewport extends React.Component {
   componentDidMount() {
     if (!this.viewport) {
       if (this.divRef) {
-        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, {
+        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, this.props.onAddNodeClick, {
           84: { pressEvent: this.props.onToggleCamera },
           70: { pressEvent: this.props.onFrameScene },
         });
@@ -50,6 +50,9 @@ class ThreeViewport extends React.Component {
     if (this.props.undoCount !== prevProps.undoCount) {
       this.viewport.undoLastMove();
     }
+    if (this.props.addMode !== prevProps.addMode) {
+      this.viewport.setAddMode(this.props.addMode);
+    }
   }
 
   setDivRef = (ref) => {
@@ -57,24 +60,36 @@ class ThreeViewport extends React.Component {
   };
 
   render() {
-    const { topLeft, topRight, children } = this.props;
+    const { topLeft, topRight, bottomLeft, bottomRight, children } = this.props;
     return (
       <React.Fragment>
         <div
           ref={this.setDivRef}
-          style={{ height: '80vh', margin: 8, border: '1px solid #999' }}
+          style={{ height: '80vh', margin: 8, border: '1px solid #999', position: 'relative' }}
         >
-          <div style={{ position: 'relative', height: 0 }}>
-            {topRight && (
-              <div style={{ position: 'absolute', margin: 4, paddingRight: 8, width: '100%', textAlign: 'right' }}>
-                {topRight}
-              </div>
-            )}
-            {topLeft && (
-              <div style={{ position: 'absolute', margin: 4 }}>
+          <div style={{ position: 'absolute', width: '100%', height: '100%', padding: 4, visibility: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', visibility: 'hidden' }}>
+              <div style={{ visibility: 'visible' }}>
                 {topLeft}
               </div>
-            )}
+              <div style={{ visibility: 'hidden', flexGrow: 1 }}>
+              </div>
+              <div style={{ visibility: 'visible' }}>
+                {topRight}
+              </div>
+            </div>
+            <div style={{ visibility: 'hidden', flexGrow: 1 }}>
+            </div>
+            <div style={{ display: 'flex', visibility: 'hidden' }}>
+              <div style={{ visibility: 'visible' }}>
+                {bottomLeft}
+              </div>
+              <div style={{ visibility: 'hidden', flexGrow: 1 }}>
+              </div>
+              <div style={{ visibility: 'visible' }}>
+                {bottomRight}
+              </div>
+            </div>
           </div>
         </div>
         {React.Children.map(children, (x) => !!x.props.viewport).every((x) => x === true) && children}
@@ -87,8 +102,12 @@ ThreeViewport.propTypes = {
   frameSceneCount: PropTypes.number.isRequired,
   undoCount: PropTypes.number.isRequired,
   onCanUndoChanged: PropTypes.func,
+  onAddNodeClick: PropTypes.func,
+  addMode: PropTypes.bool,
   topLeft: PropTypes.element,
   topRight: PropTypes.element,
+  bottomLeft: PropTypes.element,
+  bottomRight: PropTypes.element,
   onRegister: PropTypes.func,
   onToggleCamera: PropTypes.func,
   onFrameScene: PropTypes.func,
