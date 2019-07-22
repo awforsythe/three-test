@@ -77,6 +77,10 @@ class Viewport {
     return node;
   }
 
+  getNode(handle) {
+    return this.nodes.find(x => x.handle === handle);
+  }
+
   removeNode(node) {
     const index = this.nodes.findIndex(x => x == node);
     if (index >= 0) {

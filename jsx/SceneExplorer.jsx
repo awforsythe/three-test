@@ -7,6 +7,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
+import { SceneContext } from './SceneContext.jsx';
+
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
 
@@ -67,6 +69,7 @@ class SceneExplorer extends React.Component {
 
   render() {
     const { camera, frameSceneCount, undoCount, canUndo } = this.state;
+    const { nodes } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
         label="Undo"
@@ -100,19 +103,32 @@ class SceneExplorer extends React.Component {
         topLeft={undoButton}
         topRight={controls}
       >
-        <ThreeSceneNode
-          viewport={this.viewport}
-          xPos={0.0} yPos={1.0} zPos={0.0}
-          modelUrl="/models/DamagedHelmet.glb"
-        />
-        <ThreeSceneNode
-          viewport={this.viewport}
-          xPos={2.0} yPos={0.5} zPos={0.0}
-          modelUrl="/models/DamagedHelmet.glb"
-        />
+        {nodes.map(node => (
+          <ThreeSceneNode
+            key={node.id}
+            viewport={this.viewport}
+            handle={node.id}
+            modelUrl={node.model_url}
+            xPos={node.x_pos}
+            yPos={node.y_pos}
+            zPos={node.z_pos}
+          />
+        ))}
       </ThreeViewport>
     );
   }
 }
+SceneExplorer.propTypes = {
+  nodes: PropTypes.array,
+};
 
-export default SceneExplorer;
+export default (props) => (
+  <SceneContext.Consumer>
+    {context => (
+      <SceneExplorer
+        nodes={context.nodes}
+        {...props}
+      />
+    )}
+  </SceneContext.Consumer>
+);
