@@ -15,7 +15,7 @@ class ThreeViewport extends React.Component {
   componentDidMount() {
     if (!this.viewport) {
       if (this.divRef) {
-        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, this.props.onAddNodeClick, {
+        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, this.props.onAddNodeClick, this.props.onNodeMove, {
           84: { pressEvent: this.props.onToggleCamera },
           70: { pressEvent: this.props.onFrameScene },
         });
@@ -103,6 +103,7 @@ ThreeViewport.propTypes = {
   undoCount: PropTypes.number.isRequired,
   onCanUndoChanged: PropTypes.func,
   onAddNodeClick: PropTypes.func,
+  onNodeMove: PropTypes.func,
   addMode: PropTypes.bool,
   topLeft: PropTypes.element,
   topRight: PropTypes.element,

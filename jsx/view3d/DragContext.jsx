@@ -133,12 +133,15 @@ class DragContext {
   finish() {
     if (this.current) {
       if (this.current.finish()) {
+        const node = this.current.node;
         this.undoStack.push(this.current);
         this.current = null;
+        return node;
       } else {
         this.cancel();
       }
     }
+    return null;
   }
 
   cancel() {
@@ -153,10 +156,12 @@ class DragContext {
       const operation = this.undoStack.pop();
       if (operation.node.alive && operation.node.root.position.distanceToSquared(operation.worldFinish) < 0.001) {
         operation.reset();
+        return operation.node;
       } else {
         this.undoStack.clear();
       }
     }
+    return null;
   }
 }
 

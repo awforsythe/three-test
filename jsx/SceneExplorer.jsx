@@ -12,6 +12,8 @@ import { SceneContext } from './SceneContext.jsx';
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
 
+import { post } from './util.jsx';
+
 const StyledButton = withStyles({
   root: {
     backgroundColor: 'rgba(0, 0, 0, 0.075)',
@@ -55,7 +57,19 @@ class SceneExplorer extends React.Component {
 
   onAddNodeClick = (xPos, yPos, zPos) => {
     this.setState({ addMode: false });
-    console.log(`Add node at ${xPos.toPrecision(2)}, ${yPos.toPrecision(2)}, ${zPos.toPrecision(2)}`);
+    post('/api/nodes', {
+      x_pos: xPos,
+      y_pos: yPos,
+      z_pos: zPos,
+    });
+  };
+
+  onNodeMove = (handle, xPos, yPos, zPos) => {
+    post(`/api/nodes/${handle}`, {
+      x_pos: xPos,
+      y_pos: yPos,
+      z_pos: zPos,
+    });
   };
 
   toggleCamera = () => {
@@ -121,6 +135,7 @@ class SceneExplorer extends React.Component {
         onRegister={this.onViewportRegister}
         onCanUndoChanged={this.onCanUndoChanged}
         onAddNodeClick={this.onAddNodeClick}
+        onNodeMove={this.onNodeMove}
         onToggleCamera={this.toggleCamera}
         onFrameScene={this.frameScene}
         topLeft={undoButton}

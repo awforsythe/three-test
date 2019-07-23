@@ -4,12 +4,13 @@ import CursorContext from './CursorContext.jsx';
 import DragContext from './DragContext.jsx';
 
 class Selection {
-  constructor(container, switcher, addCursor, onHoveredChange, onClickedChange, onCanUndoDragChanged, onAddClick) {
+  constructor(container, switcher, addCursor, onHoveredChange, onClickedChange, onCanUndoDragChanged, onAddClick, onNodeMove) {
     this.container = container;
     this.switcher = switcher;
     this.cursor = new CursorContext(this.container, onHoveredChange, onClickedChange)
     this.drag = new DragContext(this.switcher, onCanUndoDragChanged);
     this.onAddClick = onAddClick;
+    this.onNodeMove = onNodeMove;
     this.drag.enabled = this.switcher.current.isOrthographicCamera;
     this.addCursor = addCursor;
     this.addMode = false;
@@ -72,7 +73,11 @@ class Selection {
 
     if (drag.current) {
       if (inCanvasBounds) {
-        drag.finish();
+        const movedNode = drag.finish();
+        if (movedNode && this.onNodeMove) {
+          const pos = movedNode.root.position;
+          this.onNodeMove(movedNode.handle, pos.x, pos.y, pos.z);
+        }
       } else {
         drag.cancel();
       }
@@ -84,6 +89,7 @@ class Selection {
       if (this.onAddClick) {
         const pos = this.addCursor.root.position;
         this.onAddClick(pos.x, pos.y, pos.z);
+        drag.undoStack.clear();
       }
     }
 
@@ -94,6 +100,14 @@ class Selection {
 
   update(nodes) {
     this.cursor.updateHovered(this.switcher.current, nodes);
+  }
+
+  undoLastMove() {
+    const movedNode = this.drag.undo();
+    if (movedNode && this.onNodeMove) {
+      const pos = movedNode.root.position;
+      this.onNodeMove(movedNode.handle, pos.x, pos.y, pos.z);
+    }
   }
 }
 

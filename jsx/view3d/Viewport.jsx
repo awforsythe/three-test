@@ -13,7 +13,7 @@ import Hotkeys from './Hotkeys.jsx';
 import SceneNode from './SceneNode.jsx';
 
 class Viewport {
-  constructor(containerDiv, cameraType, onCanUndoChanged, onAddNodeClick, hotkeyMappings) {
+  constructor(containerDiv, cameraType, onCanUndoChanged, onAddNodeClick, onNodeMove, hotkeyMappings) {
     THREE.Cache.enabled = true;
 
     this.scene = new THREE.Scene();
@@ -23,7 +23,7 @@ class Viewport {
     this.addCursor = new AddCursor(1.0, this.scene);
     this.renderer = new Renderer(this.container, this.switcher, this.scene);
     this.controls = new Controls(this.switcher, this.renderer.getDomElement());
-    this.selection = new Selection(this.container, this.switcher, this.addCursor, this.renderer.outlines.onHoveredChange, this.renderer.outlines.onClickedChange, onCanUndoChanged, onAddNodeClick);
+    this.selection = new Selection(this.container, this.switcher, this.addCursor, this.renderer.outlines.onHoveredChange, this.renderer.outlines.onClickedChange, onCanUndoChanged, onAddNodeClick, onNodeMove);
 
     const defaultMappings = {
       70: { pressEvent: this.frameSelection },
@@ -130,7 +130,7 @@ class Viewport {
   };
 
   undoLastMove = () => {
-    this.selection.drag.undo();
+    this.selection.undoLastMove();
   };
 
   animate = () => {
