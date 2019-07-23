@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel-node ./node_modules/webpack/bin/webpack --watch",
-    "build-production": "babel-node ./node_modules/webpack/bin/webpack --mode=\"production\""
+    "build-production": "babel-node ./node_modules/webpack/bin/webpack --mode=\"production\"",
+    "webapp": "node app.js"
   },
   "author": "",
   "license": "ISC",
@@ -29,9 +30,12 @@
   "dependencies": {
     "@material-ui/core": "^4.2.0",
     "@material-ui/icons": "^4.2.1",
+    "express": "^4.17.1",
     "http-server": "^0.11.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
     "three": "^0.106.2",
     "typeface-roboto": "0.0.54"
   }

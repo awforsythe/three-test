@@ -44,7 +44,7 @@ ThreeSceneNode.propTypes = {
   xPos: PropTypes.number.isRequired,
   yPos: PropTypes.number.isRequired,
   zPos: PropTypes.number.isRequired,
-  modelUrl: PropTypes.string.isRequired,
+  modelUrl: PropTypes.string,
   reframeOnModelLoad: PropTypes.bool,
 };
 

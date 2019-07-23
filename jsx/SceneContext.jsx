@@ -1,4 +1,7 @@
 import React from 'react';
+import io from 'socket.io-client';
+
+import { expectJson } from './util.jsx';
 
 const SceneContext = React.createContext();
 
@@ -10,57 +13,30 @@ class SceneProvider extends React.Component {
       error: null,
       nodes: [],
     };
+    this.socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
   }
 
   componentDidMount() {
     this.fetchScene();
-    setTimeout(() => this.onNodeInsert({
-      id: 3,
-      model_url: '/models/DamagedHelmet.glb',
-      x_pos: 0.0,
-      y_pos: 6.0,
-      z_pos: 2.5,
-    }), 2500);
-    setTimeout(() => this.onNodeUpdate({
-      id: 3,
-      model_url: '/models/DamagedHelmet.glb',
-      x_pos: 0.0,
-      y_pos: -0.5,
-      z_pos: 2.5,
-    }), 4500);
-    setTimeout(() => this.onNodeDelete(3), 6000);
+    this.socket.on('node insert', this.onNodeInsert);
+    this.socket.on('node update', this.onNodeUpdate);
+    this.socket.on('node delete', this.onNodeDelete);
   }
 
   componentWillUnmount() {
+    this.socket.off('node insert', this.onNodeInsert);
+    this.socket.off('node update', this.onNodeUpdate);
+    this.socket.off('node delete', this.onNodeDelete);
   }
 
   fetchScene() {
     if (this.state.isLoading) return;
     this.setState({ isLoading: true });
-    setTimeout(this.onFetchSceneFinish, 600);
+    fetch('/api/nodes')
+      .then(expectJson)
+      .then(nodes => this.setState({ isLoading: false, error: null, nodes }))
+      .catch(error => this.setState({ isLoading: false, error }));
   }
-
-  onFetchSceneFinish = () => {
-    this.setState({
-      isLoading: true,
-      nodes: [
-        {
-          id: 1,
-          model_url: '/models/DamagedHelmet.glb',
-          x_pos: 0.0,
-          y_pos: 1.0,
-          z_pos: 0.0,
-        },
-        {
-          id: 2,
-          model_url: '/models/DamagedHelmet.glb',
-          x_pos: 2.0,
-          y_pos: 0.5,
-          z_pos: 0.0,
-        },
-      ]
-    });
-  };
 
   onNodeInsert = (node) => {
     const { nodes } = this.state;
