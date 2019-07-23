@@ -43,7 +43,6 @@ class CursorContext {
   }
 
   updateClicked() {
-    console.log('updateClicked');
     const tolerance = 0.025;
     const toleranceSquared = tolerance * tolerance;
     if (this.upPos.distanceToSquared(this.downPos) < toleranceSquared) {

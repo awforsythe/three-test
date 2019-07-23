@@ -45,9 +45,9 @@ function updateNode(id, xPos, yPos, zPos, modelUrl) {
   if (index >= 0) {
     const node = {
       id: nodes[index].id,
-      x_pos: xPos || nodes[index].x_pos,
-      y_pos: yPos || nodes[index].y_pos,
-      z_pos: zPos || nodes[index].z_pos,
+      x_pos: xPos !== undefined ? xPos : nodes[index].x_pos,
+      y_pos: yPos !== undefined ? yPos : nodes[index].y_pos,
+      z_pos: zPos !== undefined ? zPos : nodes[index].z_pos,
       model_url: modelUrl !== undefined ? modelUrl : nodes[index].model_url,
     };
     nodes[index] = node;

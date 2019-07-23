@@ -15,10 +15,13 @@ function getDisplayName(url) {
 }
 
 function ModelSelect(props) {
-  const [ value, setValue ] = useState('');
-  const { modelUrls } = props;
+  const { modelUrls, value, onChange } = props;
   return (
-    <Select value={value} onChange={(event) => setValue(event.target.value)}>
+    <Select
+      fullWidth
+      value={value || ''}
+      onChange={(event) => onChange(event.target.value)}
+    >
       <MenuItem value={''}><em>None</em></MenuItem>
       {modelUrls.map(url => (
         <MenuItem key={url} value={url}>
@@ -30,6 +33,8 @@ function ModelSelect(props) {
 }
 ModelSelect.propTypes = {
   modelUrls: PropTypes.array,
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default (props) => (

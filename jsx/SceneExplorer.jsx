@@ -11,7 +11,7 @@ import { SceneContext } from './SceneContext.jsx';
 
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
-import ModelSelect from './ModelSelect.jsx';
+import NodeEditPanel from './NodeEditPanel.jsx';
 
 import { post } from './util.jsx';
 
@@ -132,6 +132,9 @@ class SceneExplorer extends React.Component {
         onClick={this.toggleAddMode}
       />
     ) : null;
+    const editor = selectedNodeHandle ? (
+      <NodeEditPanel id={selectedNodeHandle} />
+    ) : null;
     return (
       <ThreeViewport
         camera={camera}
@@ -148,7 +151,7 @@ class SceneExplorer extends React.Component {
         onFrameScene={this.frameScene}
         topLeft={undoButton}
         topRight={controls}
-        bottomLeft={selectedNodeHandle && <Typography variant="button">&nbsp;SELECTED: {selectedNodeHandle}</Typography>}
+        bottomLeft={editor}
         bottomRight={addButton}
       >
         {nodes.map(node => (
