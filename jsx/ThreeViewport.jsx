@@ -15,7 +15,7 @@ class ThreeViewport extends React.Component {
   componentDidMount() {
     if (!this.viewport) {
       if (this.divRef) {
-        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, this.props.onAddNodeClick, this.props.onNodeMove, {
+        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, this.props.onAddNodeClick, this.props.onNodeMove, this.props.onSelectedNodeChange, {
           84: { pressEvent: this.props.onToggleCamera },
           70: { pressEvent: this.props.onFrameScene },
         });
@@ -52,6 +52,9 @@ class ThreeViewport extends React.Component {
     }
     if (this.props.addMode !== prevProps.addMode) {
       this.viewport.setAddMode(this.props.addMode);
+    }
+    if (this.props.selectedNodeHandle !== prevProps.selectedNodeHandle) {
+      this.viewport.setSelectedNode(this.props.selectedNodeHandle);
     }
   }
 
@@ -104,6 +107,8 @@ ThreeViewport.propTypes = {
   onCanUndoChanged: PropTypes.func,
   onAddNodeClick: PropTypes.func,
   onNodeMove: PropTypes.func,
+  onSelectedNodeChange: PropTypes.func,
+  selectedNodeHandle: PropTypes.number,
   addMode: PropTypes.bool,
   topLeft: PropTypes.element,
   topRight: PropTypes.element,

@@ -12,17 +12,14 @@ class SelectionOutlines {
     this.clickedPass = clickedPass;
   }
 
-  onHoveredChange = (oldNode, newNode) => {
+  handleSelectionStateChange = (hoveredNode, selectedNode) => {
     this.hoveredPass.selectedObjects.length = 0;
-    if (newNode) {
-      this.hoveredPass.selectedObjects.push(newNode.root);
-    }
-  };
-
-  onClickedChange = (oldNode, newNode) => {
     this.clickedPass.selectedObjects.length = 0;
-    if (newNode) {
-      this.clickedPass.selectedObjects.push(newNode.root);
+    if (hoveredNode) {
+      this.hoveredPass.selectedObjects.push(hoveredNode.root);
+    }
+    if (selectedNode) {
+      this.clickedPass.selectedObjects.push(selectedNode.root);
     }
   };
 }

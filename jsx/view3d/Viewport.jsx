@@ -8,12 +8,13 @@ import CameraSwitcher from './CameraSwitcher.jsx';
 import AddCursor from './AddCursor.jsx';
 import Renderer from './Renderer.jsx';
 import Controls from './Controls.jsx';
+import SelectionState from './SelectionState.jsx';
 import Selection from './Selection.jsx';
 import Hotkeys from './Hotkeys.jsx';
 import SceneNode from './SceneNode.jsx';
 
 class Viewport {
-  constructor(containerDiv, cameraType, onCanUndoChanged, onAddNodeClick, onNodeMove, hotkeyMappings) {
+  constructor(containerDiv, cameraType, onCanUndoChanged, onAddNodeClick, onNodeMove, onSelectedNodeChange, hotkeyMappings) {
     THREE.Cache.enabled = true;
 
     this.scene = new THREE.Scene();
@@ -23,7 +24,8 @@ class Viewport {
     this.addCursor = new AddCursor(1.0, this.scene);
     this.renderer = new Renderer(this.container, this.switcher, this.scene);
     this.controls = new Controls(this.switcher, this.renderer.getDomElement());
-    this.selection = new Selection(this.container, this.switcher, this.addCursor, this.renderer.outlines.onHoveredChange, this.renderer.outlines.onClickedChange, onCanUndoChanged, onAddNodeClick, onNodeMove);
+    this.selectionState = new SelectionState(this.renderer.outlines.handleSelectionStateChange, onSelectedNodeChange);
+    this.selection = new Selection(this.container, this.switcher, this.addCursor, this.selectionState, onCanUndoChanged, onAddNodeClick, onNodeMove);
 
     const defaultMappings = {
       70: { pressEvent: this.frameSelection },
@@ -73,6 +75,10 @@ class Viewport {
     this.selection.setAddMode(newAddMode);
   }
 
+  setSelectedNode(handle) {
+    this.selectionState.setSelected(this.getNode(handle));
+  }
+
   addNode(options) {
     const node = new SceneNode(this.loader, options);
     if (options.reframeOnModelLoad) {
@@ -97,8 +103,8 @@ class Viewport {
   }
 
   getSceneBoundingBox() {
-    if (this.selection.cursor.clicked) {
-      return new THREE.Box3().setFromObject(this.selection.cursor.clicked.getCollisionObject());
+    if (this.selectionState.selected) {
+      return new THREE.Box3().setFromObject(this.selectionState.selected.getCollisionObject());
     }
 
     if (this.nodes.length <= 0) {

@@ -1,19 +1,16 @@
 import * as THREE from 'three';
 
 class CursorContext {
-  constructor(container, onHoveredChange, onClickedChange) {
+  constructor(container, selectionState) {
     this.container = container;
+    this.selectionState = selectionState;
+1
     this.raycaster = new THREE.Raycaster();
     this.pos = new THREE.Vector2();
     this.downPos = new THREE.Vector2();
     this.upPos = new THREE.Vector2();
 
     this.hoveredPoint = new THREE.Vector3();
-    this.hovered = null;
-    this.clicked = null;
-
-    this.onHoveredChange = onHoveredChange;
-    this.onClickedChange = onClickedChange;
   }
 
   reposition(clientX, clientY, target) {
@@ -42,34 +39,16 @@ class CursorContext {
     if (node) {
       this.hoveredPoint.copy(results[0].point);
     }
-    this._setHovered(node);
+    this.selectionState.handleHover(node);
   }
 
   updateClicked() {
+    console.log('updateClicked');
     const tolerance = 0.025;
     const toleranceSquared = tolerance * tolerance;
     if (this.upPos.distanceToSquared(this.downPos) < toleranceSquared) {
-      this._setClicked(this.hovered);
-    }
-  }
-
-  _setHovered(node) {
-    if (node !== this.hovered) {
-      const prev = this.hovered;
-      this.hovered = node;
-      if (this.onHoveredChange) {
-        this.onHoveredChange(prev, this.hovered);
-      }
-    }
-  }
-
-  _setClicked(node) {
-    if (node !== this.clicked) {
-      const prev = this.clicked;
-      this.clicked = node;
-      if (this.onClickedChange) {
-        this.onClickedChange(prev, this.clicked);
-      }
+      const node = this.selectionState.hovered;
+      this.selectionState.handleClick(node);
     }
   }
 }

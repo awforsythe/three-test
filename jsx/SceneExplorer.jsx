@@ -44,6 +44,7 @@ class SceneExplorer extends React.Component {
       undoCount: 0,
       canUndo: false,
       addMode: false,
+      selectedNodeHandle: null,
     };
   }
 
@@ -73,6 +74,10 @@ class SceneExplorer extends React.Component {
     });
   };
 
+  onSelectedNodeChange = (handle) => {
+    this.setState({ selectedNodeHandle: handle });
+  };
+
   toggleCamera = () => {
     const { camera } = this.state;
     this.setState({
@@ -97,7 +102,7 @@ class SceneExplorer extends React.Component {
   };
 
   render() {
-    const { camera, frameSceneCount, undoCount, canUndo, addMode } = this.state;
+    const { camera, frameSceneCount, undoCount, canUndo, addMode, selectedNodeHandle } = this.state;
     const { nodes } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
@@ -133,15 +138,17 @@ class SceneExplorer extends React.Component {
         frameSceneCount={frameSceneCount}
         undoCount={undoCount}
         addMode={addMode}
+        selectedNodeHandle={selectedNodeHandle}
         onRegister={this.onViewportRegister}
         onCanUndoChanged={this.onCanUndoChanged}
         onAddNodeClick={this.onAddNodeClick}
         onNodeMove={this.onNodeMove}
+        onSelectedNodeChange={this.onSelectedNodeChange}
         onToggleCamera={this.toggleCamera}
         onFrameScene={this.frameScene}
         topLeft={undoButton}
         topRight={controls}
-        bottomLeft={<ModelSelect />}
+        bottomLeft={selectedNodeHandle && <Typography variant="button">&nbsp;SELECTED: {selectedNodeHandle}</Typography>}
         bottomRight={addButton}
       >
         {nodes.map(node => (

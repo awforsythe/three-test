@@ -4,15 +4,18 @@ import CursorContext from './CursorContext.jsx';
 import DragContext from './DragContext.jsx';
 
 class Selection {
-  constructor(container, switcher, addCursor, onHoveredChange, onClickedChange, onCanUndoDragChanged, onAddClick, onNodeMove) {
+  constructor(container, switcher, addCursor, selectionState, onCanUndoDragChanged, onAddClick, onNodeMove) {
     this.container = container;
     this.switcher = switcher;
-    this.cursor = new CursorContext(this.container, onHoveredChange, onClickedChange)
+    this.addCursor = addCursor;
+    this.selectionState = selectionState;
+
+    this.cursor = new CursorContext(this.container, selectionState)
     this.drag = new DragContext(this.switcher, onCanUndoDragChanged);
+    this.drag.enabled = this.switcher.current.isOrthographicCamera;
+
     this.onAddClick = onAddClick;
     this.onNodeMove = onNodeMove;
-    this.drag.enabled = this.switcher.current.isOrthographicCamera;
-    this.addCursor = addCursor;
     this.addMode = false;
 
     this.switcher.onSwitch.push(this.handleCameraSwitch);
@@ -54,11 +57,11 @@ class Selection {
   };
 
   onMouseDown = (event) => {
-    const { cursor, drag, addCursor, addMode } = this;
+    const { cursor, drag, addCursor, selectionState, addMode } = this;
     if (event.target.parentNode === this.container.div) {
       cursor.reposition(event.clientX, event.clientY, cursor.downPos);
-      if (drag.enabled && !drag.current && cursor.hovered) {
-        drag.start(cursor.hovered, cursor.hoveredPoint);
+      if (drag.enabled && !drag.current && selectionState.hovered) {
+        drag.start(selectionState.hovered, cursor.hoveredPoint);
         if (addMode) {
           addCursor.root.visible = false;
         }
