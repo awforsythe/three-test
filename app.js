@@ -4,6 +4,7 @@ const server = require('http').Server(app);
 app.use(express.json());
 app.use(express.static('.'));
 const io = require('socket.io')(server);
+const fs = require('fs');
 
 const port = 8000;
 
@@ -74,6 +75,11 @@ function sendError(res, msg, status) {
   const obj = { message: msg };
   sendJson(res, obj, status || 404);
 }
+
+app.get('/api/models', (req, res) => {
+  const models = fs.readdirSync('./models').filter(x => x.endsWith('.glb')).map(x => '/models/' + x);
+  sendJson(res, models, 200);
+});
 
 app.get('/api/nodes', (req, res) => {
   sendJson(res, nodes, 200);

@@ -11,6 +11,7 @@ import { SceneContext } from './SceneContext.jsx';
 
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
+import ModelSelect from './ModelSelect.jsx';
 
 import { post } from './util.jsx';
 
@@ -140,6 +141,7 @@ class SceneExplorer extends React.Component {
         onFrameScene={this.frameScene}
         topLeft={undoButton}
         topRight={controls}
+        bottomLeft={<ModelSelect />}
         bottomRight={addButton}
       >
         {nodes.map(node => (

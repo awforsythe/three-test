@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 
+import { ModelsProvider } from './ModelsContext.jsx';
 import { SceneProvider } from './SceneContext.jsx';
 
 import ThemeProvider from './ThemeProvider.jsx';
@@ -15,9 +16,11 @@ function App(props) {
       <Container maxWidth="lg">
         <Typography variant="h4" style={{ marginTop: 16 }}>Three.js Test</Typography>
         <hr />
-        <SceneProvider>
-          <SceneExplorer />
-        </SceneProvider>
+        <ModelsProvider>
+          <SceneProvider>
+            <SceneExplorer />
+          </SceneProvider>
+        </ModelsProvider>
         <hr />
       </Container>
     </ThemeProvider>
