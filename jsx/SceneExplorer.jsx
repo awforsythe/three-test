@@ -9,6 +9,9 @@ import Grid from '@material-ui/core/Grid';
 
 import { SceneContext } from './SceneContext.jsx';
 
+import ViewportState from './view3d/ViewportState.jsx';
+import ViewportEvents from './view3d/ViewportEvents.jsx';
+
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
 import NodeEditPanel from './NodeEditPanel.jsx';
@@ -38,77 +41,44 @@ function ViewportButton(props) {
 class SceneExplorer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      camera: 'persp',
-      frameSceneCount: 0,
-      undoCount: 0,
-      canUndo: false,
-      addMode: false,
-      selectedNodeHandle: null,
+    this.viewport = null;
+    this.viewportState = new ViewportState((obj) => this.setState(obj));
+    this.state = { ...this.viewportState.get(), canUndo: false };
+
+    this.viewportEvents = new ViewportEvents();
+    this.viewportEvents.onRegister = (viewport) => {
+      this.viewport = viewport;
+      this.forceUpdate();
+    };
+    this.viewportEvents.onFramePress = () => {
+      this.viewportState.frame();
+    };
+    this.viewportEvents.onToggleCameraPress = () => {
+      this.viewportState.toggleCamera();
+    };
+    this.viewportEvents.onCanUndoChanged = (canUndo) => {
+      this.setState({ canUndo });
+    };
+    this.viewportEvents.onNodeAdd = (xPos, yPos, zPos) => {
+      this.viewportState.setAddMode(false);
+      post('/api/nodes', { x_pos: xPos, y_pos: yPos, z_pos: zPos });
+    };
+    this.viewportEvents.onNodeMove = (handle, xPos, yPos, zPos) => {
+      post(`/api/nodes/${handle}`, { x_pos: xPos, y_pos: yPos, z_pos: zPos });
+    };
+    this.viewportEvents.onNodeSelect = (handle) => {
+      this.viewportState.setSelectedNodeHandle(handle);
     };
   }
 
-  onViewportRegister = (viewport) => {
-    this.viewport = viewport;
-    this.forceUpdate();
-  };
-
-  onCanUndoChanged = (canUndo) => {
-    this.setState({ canUndo });
-  };
-
-  onAddNodeClick = (xPos, yPos, zPos) => {
-    this.setState({ addMode: false });
-    post('/api/nodes', {
-      x_pos: xPos,
-      y_pos: yPos,
-      z_pos: zPos,
-    });
-  };
-
-  onNodeMove = (handle, xPos, yPos, zPos) => {
-    post(`/api/nodes/${handle}`, {
-      x_pos: xPos,
-      y_pos: yPos,
-      z_pos: zPos,
-    });
-  };
-
-  onSelectedNodeChange = (handle) => {
-    this.setState({ selectedNodeHandle: handle });
-  };
-
-  toggleCamera = () => {
-    const { camera } = this.state;
-    this.setState({
-      camera: camera === 'persp' ? 'top' : 'persp',
-      addMode: false,
-    });
-  };
-
-  toggleAddMode = () => {
-    const { addMode } = this.state;
-    this.setState({ addMode: !addMode });
-  };
-
-  frameScene = () => {
-    const { frameSceneCount } = this.state;
-    this.setState({ frameSceneCount: frameSceneCount + 1 });
-  };
-
-  undoLastMove = () => {
-    const { undoCount } = this.state;
-    this.setState({ undoCount: undoCount + 1 });
-  };
-
   render() {
-    const { camera, frameSceneCount, undoCount, canUndo, addMode, selectedNodeHandle } = this.state;
+    const { cameraType, frameSceneCount, undoCount, canUndo, addMode, selectedNodeHandle } = this.state;
     const { nodes } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
         label="Undo"
         style={{ width: 32 }}
-        onClick={this.undoLastMove}
+        onClick={this.viewportState.undo}
       />
     ) : null;
     const controls = (
@@ -116,20 +86,20 @@ class SceneExplorer extends React.Component {
         <ViewportButton
           label="Frame"
           style={{ width: 32, marginRight: 4 }}
-          onClick={this.frameScene}
+          onClick={this.viewportState.frame}
         />
         <ViewportButton
-          label={camera === 'persp' ? '3D' : 'TOP'}
+          label={cameraType === 'persp' ? '3D' : 'TOP'}
           style={{ width: 32 }}
-          onClick={this.toggleCamera}
+          onClick={this.viewportState.toggleCamera}
         />
       </div>
     );
-    const addButton = camera === 'top' ? (
+    const addButton = cameraType === 'top' ? (
       <ViewportButton
         label={addMode ? 'CANCEL' : 'ADD'}
         style={{ width: 32 }}
-        onClick={this.toggleAddMode}
+        onClick={this.viewportState.toggleAddMode}
       />
     ) : null;
     const editor = selectedNodeHandle ? (
@@ -137,18 +107,8 @@ class SceneExplorer extends React.Component {
     ) : null;
     return (
       <ThreeViewport
-        camera={camera}
-        frameSceneCount={frameSceneCount}
-        undoCount={undoCount}
-        addMode={addMode}
-        selectedNodeHandle={selectedNodeHandle}
-        onRegister={this.onViewportRegister}
-        onCanUndoChanged={this.onCanUndoChanged}
-        onAddNodeClick={this.onAddNodeClick}
-        onNodeMove={this.onNodeMove}
-        onSelectedNodeChange={this.onSelectedNodeChange}
-        onToggleCamera={this.toggleCamera}
-        onFrameScene={this.frameScene}
+        viewportState={this.state}
+        viewportEvents={this.viewportEvents}
         topLeft={undoButton}
         topRight={controls}
         bottomLeft={editor}

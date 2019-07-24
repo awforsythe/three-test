@@ -14,24 +14,37 @@ import Hotkeys from './Hotkeys.jsx';
 import SceneNode from './SceneNode.jsx';
 
 class Viewport {
-  constructor(containerDiv, cameraType, onCanUndoChanged, onAddNodeClick, onNodeMove, onSelectedNodeChange, hotkeyMappings) {
+  constructor(containerDiv, state, events) { 
     THREE.Cache.enabled = true;
+
+    this.containerDiv = containerDiv;
+    this.state = state;
+    this.events = events;
 
     this.scene = new THREE.Scene();
     this.environment = new Environment(this.scene);
-    this.container = new Container(containerDiv);
-    this.switcher = new CameraSwitcher(this.container, cameraType);
+    this.container = new Container(this.containerDiv);
+    this.switcher = new CameraSwitcher(this.container, this.state.cameraType)
     this.addCursor = new AddCursor(1.0, this.scene);
     this.renderer = new Renderer(this.container, this.switcher, this.scene);
     this.controls = new Controls(this.switcher, this.renderer.getDomElement());
-    this.selectionState = new SelectionState(this.renderer.outlines.handleSelectionStateChange, onSelectedNodeChange);
-    this.selection = new Selection(this.container, this.switcher, this.addCursor, this.selectionState, onCanUndoChanged, onAddNodeClick, onNodeMove);
-
-    const defaultMappings = {
-      70: { pressEvent: this.frameSelection },
-      84: { pressEvent: this.toggleCamera },
-    };
-    this.hotkeys = new Hotkeys({...defaultMappings, ...hotkeyMappings});
+    this.selectionState = new SelectionState(
+      this.renderer.outlines.handleSelectionStateChange,
+      (handle) => this.events.dispatch(this.events.onNodeSelect, handle),
+    );
+    this.selection = new Selection(
+      this.container,
+      this.switcher,
+      this.addCursor,
+      this.selectionState,
+      (canUndo) => this.events.dispatch(this.events.onCanUndoChanged, canUndo),
+      (x, y, z) => this.events.dispatch(this.events.onNodeAdd, x, y, z),
+      (handle, x, y, z) => this.events.dispatch(this.events.onNodeMove, handle, x, y, z),
+    );
+    this.hotkeys = new Hotkeys({
+      70: { pressEvent: (() => this.events.dispatch(this.events.onFramePress)) },
+      84: { pressEvent: (() => this.events.dispatch(this.events.onToggleCameraPress)) },
+    });
 
     this.loader = new GLTFLoader();
     this.nodes = [];
@@ -41,25 +54,27 @@ class Viewport {
     this.frameSelection();
   }
 
-  handleCameraSwitch = (oldCamera, newCamera) => {
-    this.frameSelection();
-  };
-
+  /** Attaches the viewport to the DOM and registers event listeners. */
   register() {
     if (!this.registered) {
       this.registered = true;
+      
       window.addEventListener('resize', this.container.recompute, false);
       this.renderer.register();
       this.selection.register();
       this.hotkeys.register();
 
       this.animate();
+
+      this.events.dispatch(this.events.onRegister, this);
     }
   }
 
+  /** Cleans up and removes the viewport from the DOM, undoing its registration. */
   unregister() {
     if (this.registered) {
       this.registered = false;
+
       window.removeEventListener('resize', this.container.recompute, false);
       this.hotkeys.unregister();
       this.selection.unregister();
@@ -67,17 +82,29 @@ class Viewport {
     }
   }
 
-  setCameraType(newCameraType) {
-    this.switcher.setType(newCameraType)
+  updateState(newState) {
+    const { cameraType, frameCount, undoCount, selectedNodeHandle, addMode } = this.state;
+    if (cameraType !== newState.cameraType) {
+      this.switcher.setType(newState.cameraType);
+    }
+    if (frameCount !== newState.frameCount) {
+      this.frameSelection();
+    }
+    if (undoCount !== newState.undoCount) {
+      this.selection.undoLastMove();
+    }
+    if (selectedNodeHandle !== newState.selectedNodeHandle) {
+      this.selectionState.setSelected(this.getNode(newState.selectedNodeHandle));
+    }
+    if (addMode !== newState.addMode) {
+      this.selection.setAddMode(newState.addMode);
+    }
+    this.state = newState;
   }
 
-  setAddMode(newAddMode) {
-    this.selection.setAddMode(newAddMode);
-  }
-
-  setSelectedNode(handle) {
-    this.selectionState.setSelected(this.getNode(handle));
-  }
+  handleCameraSwitch = (oldCamera, newCamera) => {
+    this.frameSelection();
+  };
 
   addNode(options) {
     const node = new SceneNode(this.loader, options);
@@ -127,16 +154,7 @@ class Viewport {
   }
 
   frameSelection = () => {
-    const aabb = this.getSceneBoundingBox();
-    this.controls.frame(aabb);
-  };
-
-  toggleCamera = () => {
-    this.switcher.toggle();
-  };
-
-  undoLastMove = () => {
-    this.selection.undoLastMove();
+    this.controls.frame(this.getSceneBoundingBox());
   };
 
   animate = () => {

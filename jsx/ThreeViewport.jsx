@@ -15,14 +15,8 @@ class ThreeViewport extends React.Component {
   componentDidMount() {
     if (!this.viewport) {
       if (this.divRef) {
-        this.viewport = new Viewport(this.divRef, this.props.camera, this.props.onCanUndoChanged, this.props.onAddNodeClick, this.props.onNodeMove, this.props.onSelectedNodeChange, {
-          84: { pressEvent: this.props.onToggleCamera },
-          70: { pressEvent: this.props.onFrameScene },
-        });
+        this.viewport = new Viewport(this.divRef, this.props.viewportState, this.props.viewportEvents);
         this.viewport.register();
-        if (this.props.onRegister) {
-          this.props.onRegister(this.viewport);
-        }
       } else {
         console.error('ERROR: Component mounted without valid div ref');
       }
@@ -41,20 +35,8 @@ class ThreeViewport extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.camera !== prevProps.camera) {
-      this.viewport.setCameraType(this.props.camera);
-    }
-    if (this.props.frameSceneCount !== prevProps.frameSceneCount) {
-      this.viewport.frameSelection();
-    }
-    if (this.props.undoCount !== prevProps.undoCount) {
-      this.viewport.undoLastMove();
-    }
-    if (this.props.addMode !== prevProps.addMode) {
-      this.viewport.setAddMode(this.props.addMode);
-    }
-    if (this.props.selectedNodeHandle !== prevProps.selectedNodeHandle) {
-      this.viewport.setSelectedNode(this.props.selectedNodeHandle);
+    if (prevProps.viewportState !== this.props.viewportState) {
+      this.viewport.updateState(this.props.viewportState);
     }
   }
 
@@ -101,22 +83,12 @@ class ThreeViewport extends React.Component {
   }
 }
 ThreeViewport.propTypes = {
-  camera: PropTypes.oneOf(['top', 'persp']).isRequired,
-  frameSceneCount: PropTypes.number.isRequired,
-  undoCount: PropTypes.number.isRequired,
-  onCanUndoChanged: PropTypes.func,
-  onAddNodeClick: PropTypes.func,
-  onNodeMove: PropTypes.func,
-  onSelectedNodeChange: PropTypes.func,
-  selectedNodeHandle: PropTypes.number,
-  addMode: PropTypes.bool,
+  viewportState: PropTypes.object.isRequired,
+  viewportEvents: PropTypes.object.isRequired,
   topLeft: PropTypes.element,
   topRight: PropTypes.element,
   bottomLeft: PropTypes.element,
   bottomRight: PropTypes.element,
-  onRegister: PropTypes.func,
-  onToggleCamera: PropTypes.func,
-  onFrameScene: PropTypes.func,
 };
 
 export default ThreeViewport;
