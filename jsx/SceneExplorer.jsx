@@ -15,6 +15,7 @@ import ViewportEvents from './view3d/ViewportEvents.jsx';
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
 import NodeEditPanel from './NodeEditPanel.jsx';
+import NodeDeleteConfirmDialog from './NodeDeleteConfirmDialog.jsx';
 
 import { post } from './util.jsx';
 
@@ -43,7 +44,11 @@ class SceneExplorer extends React.Component {
     super(props);
     this.viewport = null;
     this.viewportState = new ViewportState((obj) => this.setState(obj));
-    this.state = { ...this.viewportState.get(), canUndo: false };
+    this.state = {
+      canUndo: false,
+      deleteDialogId: null,
+      ...this.viewportState.get(),
+    };
 
     this.viewportEvents = new ViewportEvents();
     this.viewportEvents.onRegister = (viewport) => {
@@ -71,8 +76,20 @@ class SceneExplorer extends React.Component {
     };
   }
 
+  handleDeletePrompt = (nodeId) => {
+    this.setState({ deleteDialogId: nodeId });
+  };
+
+  handleDeleteConfirm = (nodeId) => {
+    fetch(`/api/nodes/${nodeId}`, { method: 'DELETE' });
+  };
+
+  handleDeleteClose = () => {
+    this.setState({ deleteDialogId: null });
+  };
+
   render() {
-    const { cameraType, frameSceneCount, undoCount, canUndo, addMode, selectedNodeHandle } = this.state;
+    const { canUndo, deleteDialogId, cameraType, addMode, selectedNodeHandle } = this.state;
     const { nodes } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
@@ -103,29 +120,39 @@ class SceneExplorer extends React.Component {
       />
     ) : null;
     const editor = selectedNodeHandle ? (
-      <NodeEditPanel id={selectedNodeHandle} />
+      <NodeEditPanel
+        id={selectedNodeHandle}
+        onPromptDelete={this.handleDeletePrompt}
+      />
     ) : null;
     return (
-      <ThreeViewport
-        viewportState={this.state}
-        viewportEvents={this.viewportEvents}
-        topLeft={undoButton}
-        topRight={controls}
-        bottomLeft={editor}
-        bottomRight={addButton}
-      >
-        {nodes.map(node => (
-          <ThreeSceneNode
-            key={node.id}
-            viewport={this.viewport}
-            handle={node.id}
-            modelUrl={node.model_url}
-            xPos={node.x_pos}
-            yPos={node.y_pos}
-            zPos={node.z_pos}
-          />
-        ))}
-      </ThreeViewport>
+      <React.Fragment>
+        <ThreeViewport
+          viewportState={this.state}
+          viewportEvents={this.viewportEvents}
+          topLeft={undoButton}
+          topRight={controls}
+          bottomLeft={editor}
+          bottomRight={addButton}
+        >
+          {nodes.map(node => (
+            <ThreeSceneNode
+              key={node.id}
+              viewport={this.viewport}
+              handle={node.id}
+              modelUrl={node.model_url}
+              xPos={node.x_pos}
+              yPos={node.y_pos}
+              zPos={node.z_pos}
+            />
+          ))}
+        </ThreeViewport>
+        <NodeDeleteConfirmDialog
+          nodeId={deleteDialogId}
+          onConfirm={this.handleDeleteConfirm}
+          onClose={this.handleDeleteClose}
+        />
+      </React.Fragment>
     );
   }
 }
