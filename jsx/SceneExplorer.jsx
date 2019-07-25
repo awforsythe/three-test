@@ -17,6 +17,7 @@ import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
 import ThreeNodeLink from './ThreeNodeLink.jsx';
 import NodeEditPanel from './NodeEditPanel.jsx';
+import LinkEditPanel from './LinkEditPanel.jsx';
 import NodeDeleteConfirmDialog from './NodeDeleteConfirmDialog.jsx';
 
 import { post } from './util.jsx';
@@ -48,7 +49,7 @@ class SceneExplorer extends React.Component {
     this.viewportState = new ViewportState((obj) => this.setState(obj));
     this.state = {
       canUndo: false,
-      deleteDialogId: null,
+      nodeDeleteDialogId: null,
       ...this.viewportState.get(),
     };
 
@@ -81,20 +82,24 @@ class SceneExplorer extends React.Component {
     };
   }
 
-  handleDeletePrompt = (nodeId) => {
-    this.setState({ deleteDialogId: nodeId });
+  handleNodeDeletePrompt = (nodeId) => {
+    this.setState({ nodeDeleteDialogId: nodeId });
   };
 
-  handleDeleteConfirm = (nodeId) => {
+  handleNodeDeleteConfirm = (nodeId) => {
     fetch(`/api/nodes/${nodeId}`, { method: 'DELETE' });
   };
 
-  handleDeleteClose = () => {
-    this.setState({ deleteDialogId: null });
+  handleNodeDeleteClose = () => {
+    this.setState({ nodeDeleteDialogId: null });
+  };
+
+  handleLinkDelete = (linkId) => {
+    fetch(`/api/links/${linkId}`, { method: 'DELETE' });
   };
 
   render() {
-    const { canUndo, deleteDialogId, cameraType, addMode, linkMode, selection } = this.state;
+    const { canUndo, nodeDeleteDialogId, cameraType, addMode, linkMode, selection } = this.state;
     const { nodes, links } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
@@ -136,9 +141,14 @@ class SceneExplorer extends React.Component {
     const editor = selection.type === 'node' && selection.handle ? (
       <NodeEditPanel
         id={selection.handle}
-        onPromptDelete={this.handleDeletePrompt}
+        onDeleteClick={this.handleNodeDeletePrompt}
       />
-    ) : null;
+    ) : (selection.type === 'link' && selection.handle ? (
+      <LinkEditPanel
+        id={selection.handle}
+        onDeleteClick={this.handleLinkDelete}
+      />
+    ) : null);
     return (
       <React.Fragment>
         <ThreeViewport
@@ -170,9 +180,9 @@ class SceneExplorer extends React.Component {
           )))}
         </ThreeViewport>
         <NodeDeleteConfirmDialog
-          nodeId={deleteDialogId}
-          onConfirm={this.handleDeleteConfirm}
-          onClose={this.handleDeleteClose}
+          nodeId={nodeDeleteDialogId}
+          onConfirm={this.handleNodeDeleteConfirm}
+          onClose={this.handleNodeDeleteClose}
         />
       </React.Fragment>
     );

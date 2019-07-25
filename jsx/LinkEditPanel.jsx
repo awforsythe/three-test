@@ -5,13 +5,10 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import { post } from './util.jsx';
-import { NodesContext } from './NodesContext.jsx';
-import NodePositionControl from './NodePositionControl.jsx';
-import ModelSelect from './ModelSelect.jsx';
+import { LinksContext } from './LinksContext.jsx';
 
-function NodeEditPanel(props) {
-  const { id, xPos, yPos, zPos, modelUrl, onDeleteClick } = props;
+function LinkEditPanel(props) {
+  const { id, srcNodeId, dstNodeId, onDeleteClick } = props;
   return (
     <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: '2px 8px', border: '1px solid rgba(0, 0, 0, 0.3)', minWidth: 120 }}>
       <Grid container spacing={1} direction="column">
@@ -19,7 +16,7 @@ function NodeEditPanel(props) {
           <Grid container style={{ alignItems: 'center' }}>
             <Grid item style={{ flexGrow: 1 }}>
               <Typography variant="button">
-                Node {id}
+                Link {id}
               </Typography>
             </Grid>
             <Grid item>
@@ -35,46 +32,31 @@ function NodeEditPanel(props) {
           </Grid>
         </Grid>
         <Grid item>
-          <NodePositionControl
-            id={id}
-            xPos={xPos}
-            yPos={yPos}
-            zPos={zPos}
-          />
-        </Grid>
-        <Grid item>
-          <ModelSelect
-            value={modelUrl}
-            onChange={(newUrl) => post(`/api/nodes/${id}`, { model_url: newUrl })}
-          />
+          <Typography>From node {srcNodeId} to node {dstNodeId}</Typography>
         </Grid>
       </Grid>
     </div>
   );
 }
-NodeEditPanel.propTypes = {
+LinkEditPanel.propTypes = {
   id: PropTypes.number.isRequired,
-  xPos: PropTypes.number.isRequired,
-  yPos: PropTypes.number.isRequired,
-  zPos: PropTypes.number.isRequired,
-  modelUrl: PropTypes.string,
+  srcNodeId: PropTypes.number.isRequired,
+  dstNodeId: PropTypes.number.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
 };
 
 export default (props) => (
-  <NodesContext.Consumer>
+  <LinksContext.Consumer>
     {context => {
-      const node = context.nodes.find(x => x.id === props.id);
-      if (!node) return null;
+      const link = context.links.find(x => x.id === props.id);
+      if (!link) return null;
       return (
-        <NodeEditPanel
-          xPos={node.x_pos}
-          yPos={node.y_pos}
-          zPos={node.z_pos}
-          modelUrl={node.model_url}
+        <LinkEditPanel
+          srcNodeId={link.src_node_id}
+          dstNodeId={link.dst_node_id}
           {...props}
         />
       );
     }}
-  </NodesContext.Consumer>
+  </LinksContext.Consumer>
 );
