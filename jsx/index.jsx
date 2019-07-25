@@ -5,7 +5,8 @@ import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 
 import { ModelsProvider } from './ModelsContext.jsx';
-import { SceneProvider } from './SceneContext.jsx';
+import { NodesProvider } from './NodesContext.jsx';
+import { LinksProvider } from './LinksContext.jsx';
 
 import ThemeProvider from './ThemeProvider.jsx';
 import SceneExplorer from './SceneExplorer.jsx';
@@ -17,9 +18,11 @@ function App(props) {
         <Typography variant="h4" style={{ marginTop: 16 }}>Three.js Test</Typography>
         <hr />
         <ModelsProvider>
-          <SceneProvider>
-            <SceneExplorer />
-          </SceneProvider>
+          <NodesProvider>
+            <LinksProvider>
+              <SceneExplorer />
+            </LinksProvider>
+          </NodesProvider>
         </ModelsProvider>
         <hr />
       </Container>

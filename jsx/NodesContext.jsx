@@ -3,9 +3,9 @@ import io from 'socket.io-client';
 
 import { expectJson } from './util.jsx';
 
-const SceneContext = React.createContext();
+const NodesContext = React.createContext();
 
-class SceneProvider extends React.Component {
+class NodesProvider extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -17,7 +17,7 @@ class SceneProvider extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchScene();
+    this.fetchNodes();
     this.socket.on('node insert', this.onNodeInsert);
     this.socket.on('node update', this.onNodeUpdate);
     this.socket.on('node delete', this.onNodeDelete);
@@ -29,7 +29,7 @@ class SceneProvider extends React.Component {
     this.socket.off('node delete', this.onNodeDelete);
   }
 
-  fetchScene() {
+  fetchNodes() {
     if (this.state.isLoading) return;
     this.setState({ isLoading: true });
     fetch('/api/nodes')
@@ -42,7 +42,7 @@ class SceneProvider extends React.Component {
     const { nodes } = this.state;
     const index = nodes.findIndex(x => x.id === node.id);
     if (index >= 0) {
-      this.fetchScene();
+      this.fetchNodes();
     } else {
       this.setState({
         nodes: [node].concat(nodes),
@@ -58,7 +58,7 @@ class SceneProvider extends React.Component {
         nodes: nodes.slice(0, index).concat([node]).concat(nodes.slice(index + 1)),
       });
     } else {
-      this.fetchScene();
+      this.fetchNodes();
     }
   };
 
@@ -70,18 +70,18 @@ class SceneProvider extends React.Component {
         nodes: nodes.slice(0, index).concat(nodes.slice(index + 1)),
       });
     } else {
-      this.fetchScene();
+      this.fetchNodes();
     }
   };
 
   render() {
     const { children } = this.props;
     return (
-      <SceneContext.Provider value={{ ...this.state }}>
+      <NodesContext.Provider value={{ ...this.state }}>
         {children}
-      </SceneContext.Provider>
+      </NodesContext.Provider>
     );
   }
 }
 
-export { SceneContext, SceneProvider };
+export { NodesContext, NodesProvider };

@@ -7,7 +7,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
-import { SceneContext } from './SceneContext.jsx';
+import { NodesContext } from './NodesContext.jsx';
+import { LinksContext } from './LinksContext.jsx';
 
 import ViewportState from './view3d/ViewportState.jsx';
 import ViewportEvents from './view3d/ViewportEvents.jsx';
@@ -90,7 +91,7 @@ class SceneExplorer extends React.Component {
 
   render() {
     const { canUndo, deleteDialogId, cameraType, addMode, selectedNodeHandle } = this.state;
-    const { nodes } = this.props;
+    const { nodes, links } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
         label="Undo"
@@ -152,21 +153,30 @@ class SceneExplorer extends React.Component {
           onConfirm={this.handleDeleteConfirm}
           onClose={this.handleDeleteClose}
         />
+        <ul>
+          {links.map(x => <li key={x.id}>Link {x.id}: from {x.src_node_id} to {x.dst_node_id}</li>)}
+        </ul>
       </React.Fragment>
     );
   }
 }
 SceneExplorer.propTypes = {
   nodes: PropTypes.array,
+  links: PropTypes.array,
 };
 
 export default (props) => (
-  <SceneContext.Consumer>
-    {context => (
-      <SceneExplorer
-        nodes={context.nodes}
-        {...props}
-      />
+  <NodesContext.Consumer>
+    {nodesContext => (
+      <LinksContext.Consumer>
+        {linksContext => (
+          <SceneExplorer
+            nodes={nodesContext.nodes}
+            links={linksContext.links}
+            {...props}
+          />
+        )}
+      </LinksContext.Consumer>
     )}
-  </SceneContext.Consumer>
+  </NodesContext.Consumer>
 );

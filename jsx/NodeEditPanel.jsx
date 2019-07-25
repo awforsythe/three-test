@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
 import { post } from './util.jsx';
-import { SceneContext } from './SceneContext.jsx';
+import { NodesContext } from './NodesContext.jsx';
 import NodePositionControl from './NodePositionControl.jsx';
 import ModelSelect from './ModelSelect.jsx';
 
@@ -62,7 +62,7 @@ NodeEditPanel.propTypes = {
 };
 
 export default (props) => (
-  <SceneContext.Consumer>
+  <NodesContext.Consumer>
     {context => {
       const node = context.nodes.find(x => x.id === props.id);
       if (!node) return null;
@@ -76,5 +76,5 @@ export default (props) => (
         />
       );
     }}
-  </SceneContext.Consumer>
+  </NodesContext.Consumer>
 );

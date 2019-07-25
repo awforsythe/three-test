@@ -18,6 +18,9 @@ let nodes = [
   },
 ];
 
+let links = [
+];
+
 function getNextNodeId() {
   let maxId = 0;
   for (const node of nodes) {
@@ -57,12 +60,56 @@ function updateNode(id, xPos, yPos, zPos, modelUrl) {
 };
 
 function removeNode(id) {
-  const index = nodes.findIndex(x => x.id == id);
+  const index = nodes.findIndex(x => x.id === id);
   if (index >= 0) {
     nodes.splice(index, 1);
     return true;
   }
   return false;
+}
+
+function getNextLinkId() {
+  let maxId = 0;
+  for (const link of links) {
+    if (link.id > maxId) {
+      maxId = link.id;
+    }
+  }
+  return maxId + 1;
+}
+
+function findLink(srcNodeId, dstNodeId) {
+  return links.find(x => x.src_node_id === srcNodeId && x.dst_node_id === dstNodeId);
+}
+
+function addLink(srcNodeId, dstNodeId) {
+  const link = {
+    id: getNextLinkId(),
+    src_node_id: srcNodeId,
+    dst_node_id: dstNodeId,
+  };
+  links.push(link);
+  return link;
+}
+
+function removeLink(id) {
+  const index = links.findIndex(x => x.id === id);
+  if (index >= 0) {
+    links.splice(index, 1);
+    return true;
+  }
+  return false;
+}
+
+function removeDependentLinks(id) {
+  const removed = [];
+  for (let index = links.length - 1; index >= 0; index--) {
+    if (links[index].srcNodeId === id || links[index].dstNodeId === id) {
+      removed.push(links[index].id);
+      links.splice(index, 1);
+    }
+  }
+  return removed;
 }
 
 function sendJson(res, obj, status) {
@@ -86,8 +133,8 @@ app.get('/api/nodes', (req, res) => {
 });
 
 app.get('/api/nodes/:id', (req, res) => {
-  const id = req.params.id;
-  const node = nodes.find(x => x.id == id);
+  const id = Number.parseInt(req.params.id);
+  const node = nodes.find(x => x.id === id);
   if (node) {
     sendJson(res, node, 200);
   } else {
@@ -103,7 +150,7 @@ app.post('/api/nodes', (req, res) => {
 });
 
 app.post('/api/nodes/:id', (req, res) => {
-  const id = req.params.id;
+  const id = Number.parseInt(req.params.id);
   const { x_pos, y_pos, z_pos, model_url } = req.body;
   const node = updateNode(id, x_pos, y_pos, z_pos, model_url);
   if (node) {
@@ -115,13 +162,75 @@ app.post('/api/nodes/:id', (req, res) => {
 });
 
 app.delete('/api/nodes/:id', (req, res) => {
-  const id = req.params.id;
+  const id = Number.parseInt(req.params.id);
   if (removeNode(id)) {
+    for (const linkId of removeDependentLinks(id)) {
+      io.emit('link delete', linkId);
+    }
     io.emit('node delete', id);
+
     res.status(204);
     res.end();
   } else {
     sendError(res, `Node ${id} does not exist`, 404);
+  }
+});
+
+app.get('/api/links', (req, res) => {
+  sendJson(res, links, 200);
+});
+
+app.post('/api/links', (req, res) => {
+  const { src_node_id, dst_node_id } = req.body;
+  if (!src_node_id || !dst_node_id) {
+    sendError(res, "'src_node_id' and 'dst_node_id' params are required", 400);
+    return;
+  }
+  if (src_node_id == dst_node_id) {
+    sendError(res, "'src_node_id' and 'dst_node_id' params must be different", 400);
+    return;
+  }
+
+  const src_node = nodes.find(x => x.id === src_node_id);
+  if (!src_node) {
+    sendError(res, `Node ${src_node_id} does not exist`, 404);
+    return;
+  }
+  const dst_node = nodes.find(x => x.id === dst_node_id);
+  if (!dst_node) {
+    sendError(res, `Node ${dst_node_id} does not exist`, 404);
+    return;
+  }
+
+  const existingLink = findLink(src_node_id, dst_node_id);
+  if (existingLink) {
+    sendError(res, `A link already exists between nodes ${src_node_id} and ${dst_node_id}`, 400);
+    return;
+  }
+
+  const link = addLink(src_node_id, dst_node_id);
+  io.emit('link insert', link);
+  sendJson(res, link, 201);
+});
+
+app.get('/api/links/:id', (req, res) => {
+  const id = Number.parseInt(req.params.id);
+  const link = links.find(x => x.id === id);
+  if (link) {
+    sendJson(res, link, 200);
+  } else {
+    sendError(res, `Link ${id} does not exist`, 404);
+  }
+});
+
+app.delete('/api/links/:id', (req, res) => {
+  const id = Number.parseInt(req.params.id);
+  if (removeLink(id)) {
+    io.emit('link delete', id);
+    res.status(204);
+    res.end();
+  } else {
+    sendError(res, `Link ${id} does not exist`, 404);
   }
 });
 
