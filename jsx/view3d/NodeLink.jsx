@@ -15,14 +15,14 @@ class NodeLink {
     this.cylinderGeometry = new THREE.CylinderBufferGeometry(0.05, 0.05, 1.0, 16);
     this.cylinder = new THREE.Mesh(this.cylinderGeometry, this.material);
     this.root.add(this.cylinder);
-    this.cylinder.position.z = -0.1;
-    this.cylinder.rotation.z = Math.PI / 2;
+    this.cylinder.position.z = 0.1;
+    this.cylinder.rotation.z = Math.PI * 0.5;
 
     this.coneGeometry = new THREE.ConeBufferGeometry(0.15, 0.5, 16, 1);
     this.cone = new THREE.Mesh(this.coneGeometry, this.material);
     this.root.add(this.cone);
-    this.cone.position.z = -0.1;
-    this.cone.rotation.z = Math.PI / 2;
+    this.cone.position.z = 0.1;
+    this.cone.rotation.z = Math.PI * -0.5;
   }
 
   setSrcPosition(newPosition) {
@@ -50,7 +50,7 @@ class NodeLink {
 
     this.root.position.lerpVectors(v0, v1, 0.5);
     this.root.setRotationFromMatrix(matrix);
-    this.cone.position.x = (displayDistance * -0.5);
+    this.cone.position.x = (displayDistance * 0.5);
     this.cylinder.scale.y = displayDistance;
   }
 
