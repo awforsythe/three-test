@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import Environment from './Environment.jsx';
 import AddCursor from './AddCursor.jsx';
 import SceneNode from './SceneNode.jsx';
+import NodeLink from './NodeLink.jsx';
 
 class Scene {
   constructor() {
@@ -14,12 +15,32 @@ class Scene {
 
     this.loader = new GLTFLoader();
     this.nodes = [];
+    this.links = [];
+
+    // TEMP
+    this.addLink(1, 1, 2);
+    this.addLink(2, 2, 1);
+    this.addLink(3, 1, 3);
+    this.addLink(4, 1, 4);
+    // END TEMP
   }
+
+  handleNodeMove = (node) => {
+    for (const link of this.links) {
+      if (link.srcNodeHandle === node.handle) {
+        link.setSrcPosition(node.root.position);
+      } else if (link.dstNodeHandle === node.handle) {
+        link.setDstPosition(node.root.position);
+      }
+    }
+  };
 
   add(options) {
     const node = new SceneNode(this.loader, options);
+    node.onMove = this.handleNodeMove;
     this.nodes.push(node);
     this.scene.add(node.root);
+    this.handleNodeMove(node);
     return node;
   }
 
@@ -32,6 +53,32 @@ class Scene {
     if (index >= 0) {
       this.nodes.splice(index, 1);
       this.scene.remove(node.root);
+    }
+  }
+
+  addLink(handle, srcNodeHandle, dstNodeHandle) {
+    const link = new NodeLink(handle, srcNodeHandle, dstNodeHandle);
+    this.links.push(link);
+    this.scene.add(link.root);
+
+    const srcNode = this.nodes.find(x => x.handle == srcNodeHandle);
+    if (srcNode) {
+      link.setSrcPosition(srcNode.root.position);
+    }
+    const dstNode = this.nodes.find(x => x.handle == dstNodeHandle);
+    if (dstNode) {
+      link.setDstPosition(dstNode.root.position);
+    }
+
+    return link;
+  }
+
+  removeLink(handle) {
+    const index = this.links.findIndex(x => x.handle == handle);
+    if (index >= 0) {
+      const link = this.links[index];
+      this.links.splice(index, 1);
+      this.scene.remove(link.root);
     }
   }
 

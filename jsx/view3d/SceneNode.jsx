@@ -3,10 +3,11 @@ import * as THREE from 'three';
 import { vec } from './util.jsx';
 
 class SceneNode {
-  constructor(loader, options, onModelLoad) {
+  constructor(loader, options) {
     this.loader = loader;
     this.options = options || {};
-    this.onModelLoad = onModelLoad;
+    this.onModelLoad = null;
+    this.onMove = null;
     this.hovered = false;
     this.selected = false;
     this.root = new THREE.Group();
@@ -33,6 +34,9 @@ class SceneNode {
 
   setPosition(position) {
     this.root.position.copy(position);
+    if (this.onMove) {
+      this.onMove(this);
+    }
   }
 
   setModel(url) {
