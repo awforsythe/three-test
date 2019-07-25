@@ -65,7 +65,7 @@ class ThreeViewport extends React.Component {
             </div>
             <div style={{ visibility: 'hidden', flexGrow: 1 }}>
             </div>
-            <div style={{ display: 'flex', visibility: 'hidden' }}>
+            <div style={{ display: 'flex', visibility: 'hidden', alignItems: 'flex-end' }}>
               <div style={{ visibility: 'visible' }}>
                 {bottomLeft}
               </div>

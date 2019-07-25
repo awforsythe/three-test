@@ -6,9 +6,7 @@ class ViewportEvents {
     this.onCanUndoChanged = null;    // (bool)
     this.onNodeAdd = null;           // (float, float, float)
     this.onNodeMove = null;          // (int, float, float, float)
-    this.onNodeDelete = null;        // (int)
     this.onLinkAdd = null;           // (int, int)
-    this.onLinkDelete = null;        // (int)
     this.onSelectionChange = null;   // (str?, int?)
   }
 

@@ -17,6 +17,7 @@ class Selection {
     this.onAddClick = onAddClick;
     this.onNodeMove = onNodeMove;
     this.addMode = false;
+    this.linkMode = false;
 
     this.switcher.onSwitch.push(this.handleCameraSwitch);
   }
@@ -37,6 +38,12 @@ class Selection {
     if (this.addMode !== newAddMode) {
       this.addMode = newAddMode;
       this.addCursor.root.visible = newAddMode;
+    }
+  }
+
+  setLinkMode(newLinkMode) {
+    if (this.linkMode !== newLinkMode) {
+      this.linkMode = newLinkMode;
     }
   }
 
@@ -97,7 +104,7 @@ class Selection {
     }
 
     if (onCanvas && inCanvasBounds) {
-      cursor.updateClicked();
+      cursor.updateClicked(this.linkMode);
     }
   };
 

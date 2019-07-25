@@ -4,7 +4,7 @@ class CursorContext {
   constructor(container, selectionState) {
     this.container = container;
     this.selectionState = selectionState;
-1
+
     this.raycaster = new THREE.Raycaster();
     this.pos = new THREE.Vector2();
     this.downPos = new THREE.Vector2();
@@ -42,12 +42,12 @@ class CursorContext {
     this.selectionState.handleHover(nodeOrLink);
   }
 
-  updateClicked() {
+  updateClicked(linkMode) {
     const tolerance = 0.025;
     const toleranceSquared = tolerance * tolerance;
     if (this.upPos.distanceToSquared(this.downPos) < toleranceSquared) {
       const nodeOrLink = this.selectionState.hovered;
-      this.selectionState.handleClick(nodeOrLink);
+      this.selectionState.handleClick(nodeOrLink, linkMode);
     }
   }
 }

@@ -73,6 +73,9 @@ class SceneExplorer extends React.Component {
     this.viewportEvents.onNodeMove = (handle, xPos, yPos, zPos) => {
       post(`/api/nodes/${handle}`, { x_pos: xPos, y_pos: yPos, z_pos: zPos });
     };
+    this.viewportEvents.onLinkAdd = (srcNodeHandle, dstNodeHandle) => {
+      post('/api/links', { src_node_id: srcNodeHandle, dst_node_id: dstNodeHandle });
+    };
     this.viewportEvents.onSelectionChange = (type, handle) => {
       this.viewportState.setSelection(type, handle);
     };
@@ -91,7 +94,7 @@ class SceneExplorer extends React.Component {
   };
 
   render() {
-    const { canUndo, deleteDialogId, cameraType, addMode, selection } = this.state;
+    const { canUndo, deleteDialogId, cameraType, addMode, linkMode, selection } = this.state;
     const { nodes, links } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
@@ -114,13 +117,22 @@ class SceneExplorer extends React.Component {
         />
       </div>
     );
-    const addButton = cameraType === 'top' ? (
+
+    const canAdd = cameraType === 'top';
+    const canLink = selection.type === 'link';
+    const addOrLinkButton = selection.type === 'node' ? (
+      <ViewportButton
+        label={linkMode ? 'CANCEL' : 'LINK'}
+        style={{ width: 32 }}
+        onClick={this.viewportState.toggleLinkMode}
+      />
+    ) : (cameraType === 'top' ? (
       <ViewportButton
         label={addMode ? 'CANCEL' : 'ADD'}
         style={{ width: 32 }}
         onClick={this.viewportState.toggleAddMode}
       />
-    ) : null;
+    ) : null);
     const editor = selection.type === 'node' && selection.handle ? (
       <NodeEditPanel
         id={selection.handle}
@@ -135,7 +147,7 @@ class SceneExplorer extends React.Component {
           topLeft={undoButton}
           topRight={controls}
           bottomLeft={editor}
-          bottomRight={addButton}
+          bottomRight={addOrLinkButton}
         >
           {nodes.map(node => (
             <ThreeSceneNode

@@ -25,6 +25,7 @@ class Viewport {
     this.selectionState = new SelectionState(
       this.renderer.outlines.handleSelectionStateChange,
       (type, handle) => this.events.dispatch(this.events.onSelectionChange, type, handle),
+      (srcNodeHandle, dstNodeHandle) => this.events.dispatch(this.events.onLinkAdd, srcNodeHandle, dstNodeHandle),
     );
     this.selection = new Selection(
       this.container,
@@ -74,7 +75,7 @@ class Viewport {
   }
 
   updateState(newState) {
-    const { cameraType, frameCount, undoCount, selection, addMode } = this.state;
+    const { cameraType, frameCount, undoCount, selection, addMode, linkMode } = this.state;
     if (cameraType !== newState.cameraType) {
       this.switcher.setType(newState.cameraType);
     }
@@ -95,6 +96,9 @@ class Viewport {
     }
     if (addMode !== newState.addMode) {
       this.selection.setAddMode(newState.addMode);
+    }
+    if (linkMode !== newState.linkMode) {
+      this.selection.setLinkMode(newState.linkMode);
     }
     this.state = newState;
   }

@@ -5,6 +5,7 @@ class ViewportState {
     this.undoCount = 0;
     this.selection = { type: null, handle: null };
     this.addMode = false;
+    this.linkMode = false;
 
     this.onChange = onChange;
   }
@@ -16,6 +17,7 @@ class ViewportState {
       undoCount: this.undoCount,
       selection: this.selection,
       addMode: this.addMode,
+      linkMode: this.linkMode,
     };
   }
 
@@ -30,7 +32,7 @@ class ViewportState {
     this.onChange({ frameCount: this.frameCount });
   };
 
-  undo = () => { 
+  undo = () => {
     this.undoCount += 1;
     this.onChange({ undoCount: this.undoCount });
   };
@@ -41,7 +43,8 @@ class ViewportState {
       if (this.selection.handle) {
         this.selection.type = null;
         this.selection.handle = null;
-        this.onChange({ selection: { type: null, handle: null } });
+        this.linkMode = false;
+        this.onChange({ selection: { type: null, handle: null }, linkMode: this.linkMode });
       }
     } else {
       if (this.selection.type !== type || this.selection.handle !== handle) {
@@ -61,6 +64,18 @@ class ViewportState {
     if (addMode !== this.addMode) {
       this.addMode = addMode;
       this.onChange({ addMode: this.addMode });
+    }
+  };
+
+  toggleLinkMode = () => {
+    this.linkMode = !this.linkMode;
+    this.onChange({ linkMode: this.linkMode });
+  };
+
+  setLinkMode = (linkMode) => {
+    if (linkMode !== this.linkMode) {
+      this.linkMode = linkMode;
+      this.onChange({ linkMode: this.linkMode });
     }
   };
 }
