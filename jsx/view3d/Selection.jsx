@@ -60,7 +60,7 @@ class Selection {
     const { cursor, drag, addCursor, selectionState, addMode } = this;
     if (event.target.parentNode === this.container.div) {
       cursor.reposition(event.clientX, event.clientY, cursor.downPos);
-      if (drag.enabled && !drag.current && selectionState.hovered) {
+      if (drag.enabled && !drag.current && selectionState.hovered && selectionState.hovered.isSceneNode) {
         drag.start(selectionState.hovered, cursor.hoveredPoint);
         if (addMode) {
           addCursor.root.visible = false;
@@ -101,8 +101,8 @@ class Selection {
     }
   };
 
-  update(nodes) {
-    this.cursor.updateHovered(this.switcher.current, nodes);
+  update(nodes, links) {
+    this.cursor.updateHovered(this.switcher.current, nodes.concat(links));
   }
 
   undoLastMove() {

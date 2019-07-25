@@ -6,22 +6,28 @@ class SelectionState {
     this.onSelect = onSelect;
   }
 
-  handleHover = (node) => {
-    if (node !== this.hovered) {
-      this.hovered = node;
+  handleHover = (nodeOrLink) => {
+    if (nodeOrLink !== this.hovered) {
+      this.hovered = nodeOrLink;
       this.onChange(this.hovered, this.selected);
     }
   };
 
-  handleClick = (node) => {
-    if (node !== this.selected) {
-      this.onSelect(node ? node.handle : null);
+  handleClick = (nodeOrLink) => {
+    if (nodeOrLink !== this.selected) {
+      if (nodeOrLink) {
+        const type = nodeOrLink.isSceneNode ? 'node' : 'link';
+        const handle = nodeOrLink.handle;
+        this.onSelect(type, handle);
+      } else {
+        this.onSelect(null, null);
+      }
     }
   };
 
-  setSelected(node) {
-    if (node !== this.selected) {
-      this.selected = node;
+  setSelection(nodeOrLink) {
+    if (nodeOrLink !== this.selected) {
+      this.selected = nodeOrLink;
       this.onChange(this.hovered, this.selected);
     }
   }

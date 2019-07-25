@@ -35,6 +35,14 @@ class NodeLink {
     this._updateMesh();
   }
 
+  getCollisionObject() {
+    return this.cylinder;
+  }
+
+  isParentTo(obj) {
+    return obj === this.cylinder;
+  }
+
   _updateMesh() {
     const [forward, distance] = this._getDirectionAndDistance();
     const [v0, v1, displayDistance] = this._getDisplayPoints(forward, distance);

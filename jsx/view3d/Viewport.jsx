@@ -24,7 +24,7 @@ class Viewport {
     this.controls = new Controls(this.switcher, this.renderer.getDomElement());
     this.selectionState = new SelectionState(
       this.renderer.outlines.handleSelectionStateChange,
-      (handle) => this.events.dispatch(this.events.onNodeSelect, handle),
+      (type, handle) => this.events.dispatch(this.events.onSelectionChange, type, handle),
     );
     this.selection = new Selection(
       this.container,
@@ -74,7 +74,7 @@ class Viewport {
   }
 
   updateState(newState) {
-    const { cameraType, frameCount, undoCount, selectedNodeHandle, addMode } = this.state;
+    const { cameraType, frameCount, undoCount, selection, addMode } = this.state;
     if (cameraType !== newState.cameraType) {
       this.switcher.setType(newState.cameraType);
     }
@@ -84,8 +84,14 @@ class Viewport {
     if (undoCount !== newState.undoCount) {
       this.selection.undoLastMove();
     }
-    if (selectedNodeHandle !== newState.selectedNodeHandle) {
-      this.selectionState.setSelected(this.scene.get(newState.selectedNodeHandle));
+    if (selection !== newState.selection) {
+      if (!newState.selection.handle) {
+        this.selectionState.setSelection(null);
+      } else if (newState.selection.type === 'node') {
+        this.selectionState.setSelection(this.scene.get(newState.selection.handle));
+      } else if (newState.selection.type === 'link') {
+        this.selectionState.setSelection(this.scene.getLink(newState.selection.handle));
+      }
     }
     if (addMode !== newState.addMode) {
       this.selection.setAddMode(newState.addMode);
@@ -123,7 +129,7 @@ class Viewport {
     if (this.registered) {
       requestAnimationFrame(this.animate);
       this.controls.update();
-      this.selection.update(this.scene.nodes);
+      this.selection.update(this.scene.nodes, this.scene.links);
       this.renderer.render();
     }
   };

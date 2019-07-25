@@ -73,6 +73,10 @@ class Scene {
     return link;
   }
 
+  getLink(handle) {
+    return this.links.find(x => x.handle === handle);
+  }
+
   removeLink(handle) {
     const index = this.links.findIndex(x => x.handle == handle);
     if (index >= 0) {

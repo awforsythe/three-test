@@ -13,6 +13,7 @@ class SceneNode {
     this.root = new THREE.Group();
     this.alive = true;
     this.handle = this.options.handle || 0;
+    this.isSceneNode = true;
 
     this.model = null;
     this.loadedModelUrl = null;

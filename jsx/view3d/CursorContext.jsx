@@ -27,27 +27,27 @@ class CursorContext {
     return false;
   }
 
-  updateHovered(camera, nodes) {
+  updateHovered(camera, nodesAndLinks) {
     let objs = [];
-    for (const node of nodes) {
-      objs.push(node.getCollisionObject());
+    for (const nodeOrLink of nodesAndLinks) {
+      objs.push(nodeOrLink.getCollisionObject());
     }
 
     this.raycaster.setFromCamera(this.pos, camera);
     const results = this.raycaster.intersectObjects(objs, true);
-    const node = results.length > 0 ? nodes.find(x => x.isParentTo(results[0].object)) : null;
-    if (node) {
+    const nodeOrLink = results.length > 0 ? nodesAndLinks.find(x => x.isParentTo(results[0].object)) : null;
+    if (nodeOrLink) {
       this.hoveredPoint.copy(results[0].point);
     }
-    this.selectionState.handleHover(node);
+    this.selectionState.handleHover(nodeOrLink);
   }
 
   updateClicked() {
     const tolerance = 0.025;
     const toleranceSquared = tolerance * tolerance;
     if (this.upPos.distanceToSquared(this.downPos) < toleranceSquared) {
-      const node = this.selectionState.hovered;
-      this.selectionState.handleClick(node);
+      const nodeOrLink = this.selectionState.hovered;
+      this.selectionState.handleClick(nodeOrLink);
     }
   }
 }

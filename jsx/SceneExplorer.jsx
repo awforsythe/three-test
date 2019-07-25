@@ -72,8 +72,8 @@ class SceneExplorer extends React.Component {
     this.viewportEvents.onNodeMove = (handle, xPos, yPos, zPos) => {
       post(`/api/nodes/${handle}`, { x_pos: xPos, y_pos: yPos, z_pos: zPos });
     };
-    this.viewportEvents.onNodeSelect = (handle) => {
-      this.viewportState.setSelectedNodeHandle(handle);
+    this.viewportEvents.onSelectionChange = (type, handle) => {
+      this.viewportState.setSelection(type, handle);
     };
   }
 
@@ -90,7 +90,7 @@ class SceneExplorer extends React.Component {
   };
 
   render() {
-    const { canUndo, deleteDialogId, cameraType, addMode, selectedNodeHandle } = this.state;
+    const { canUndo, deleteDialogId, cameraType, addMode, selection } = this.state;
     const { nodes, links } = this.props;
     const undoButton = canUndo ? (
       <ViewportButton
@@ -120,9 +120,9 @@ class SceneExplorer extends React.Component {
         onClick={this.viewportState.toggleAddMode}
       />
     ) : null;
-    const editor = selectedNodeHandle ? (
+    const editor = selection.type === 'node' && selection.handle ? (
       <NodeEditPanel
-        id={selectedNodeHandle}
+        id={selection.handle}
         onPromptDelete={this.handleDeletePrompt}
       />
     ) : null;

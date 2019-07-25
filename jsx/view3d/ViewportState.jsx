@@ -3,7 +3,7 @@ class ViewportState {
     this.cameraType = 'persp';
     this.frameCount = 0;
     this.undoCount = 0;
-    this.selectedNodeHandle = null;
+    this.selection = { type: null, handle: null };
     this.addMode = false;
 
     this.onChange = onChange;
@@ -14,7 +14,7 @@ class ViewportState {
       cameraType: this.cameraType,
       frameCount: this.frameCount,
       undoCount: this.undoCount,
-      selectedNodeHandle: this.selectedNodeHandle,
+      selection: this.selection,
       addMode: this.addMode,
     };
   }
@@ -35,10 +35,20 @@ class ViewportState {
     this.onChange({ undoCount: this.undoCount });
   };
 
-  setSelectedNodeHandle = (handle) => {
-    if (handle !== this.selectedNodeHandle) {
-      this.selectedNodeHandle = handle;
-      this.onChange({ selectedNodeHandle: this.selectedNodeHandle });
+  setSelection = (type, handle) => {
+    const deselect = !handle;
+    if (deselect) {
+      if (this.selection.handle) {
+        this.selection.type = null;
+        this.selection.handle = null;
+        this.onChange({ selection: { type: null, handle: null } });
+      }
+    } else {
+      if (this.selection.type !== type || this.selection.handle !== handle) {
+        this.selection.type = type;
+        this.selection.handle = handle;
+        this.onChange({ selection: { type: this.selection.type, handle: this.selection.handle } });
+      }
     }
   };
 
