@@ -10,7 +10,7 @@ import Selection from './Selection.jsx';
 import Hotkeys from './Hotkeys.jsx';
 
 class Viewport {
-  constructor(containerDiv, state, events) { 
+  constructor(containerDiv, state, events) {
     THREE.Cache.enabled = true;
 
     this.containerDiv = containerDiv;
@@ -49,7 +49,7 @@ class Viewport {
   register() {
     if (!this.registered) {
       this.registered = true;
-      
+
       window.addEventListener('resize', this.container.recompute, false);
       this.renderer.register();
       this.selection.register();

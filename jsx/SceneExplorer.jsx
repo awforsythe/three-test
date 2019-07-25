@@ -15,6 +15,7 @@ import ViewportEvents from './view3d/ViewportEvents.jsx';
 
 import ThreeViewport from './ThreeViewport.jsx';
 import ThreeSceneNode from './ThreeSceneNode.jsx';
+import ThreeNodeLink from './ThreeNodeLink.jsx';
 import NodeEditPanel from './NodeEditPanel.jsx';
 import NodeDeleteConfirmDialog from './NodeDeleteConfirmDialog.jsx';
 
@@ -138,7 +139,7 @@ class SceneExplorer extends React.Component {
         >
           {nodes.map(node => (
             <ThreeSceneNode
-              key={node.id}
+              key={`node_${node.id}`}
               viewport={this.viewport}
               handle={node.id}
               modelUrl={node.model_url}
@@ -146,16 +147,21 @@ class SceneExplorer extends React.Component {
               yPos={node.y_pos}
               zPos={node.z_pos}
             />
-          ))}
+          )).concat(links.map(link => (
+            <ThreeNodeLink
+              key={`link_${link.id}`}
+              viewport={this.viewport}
+              handle={link.id}
+              srcNodeHandle={link.src_node_id}
+              dstNodeHandle={link.dst_node_id}
+            />
+          )))}
         </ThreeViewport>
         <NodeDeleteConfirmDialog
           nodeId={deleteDialogId}
           onConfirm={this.handleDeleteConfirm}
           onClose={this.handleDeleteClose}
         />
-        <ul>
-          {links.map(x => <li key={x.id}>Link {x.id}: from {x.src_node_id} to {x.dst_node_id}</li>)}
-        </ul>
       </React.Fragment>
     );
   }

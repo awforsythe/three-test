@@ -104,7 +104,7 @@ function removeLink(id) {
 function removeDependentLinks(id) {
   const removed = [];
   for (let index = links.length - 1; index >= 0; index--) {
-    if (links[index].srcNodeId === id || links[index].dstNodeId === id) {
+    if (links[index].src_node_id === id || links[index].dst_node_id === id) {
       removed.push(links[index].id);
       links.splice(index, 1);
     }

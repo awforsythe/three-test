@@ -16,13 +16,6 @@ class Scene {
     this.loader = new GLTFLoader();
     this.nodes = [];
     this.links = [];
-
-    // TEMP
-    this.addLink(1, 1, 2);
-    this.addLink(2, 2, 1);
-    this.addLink(3, 1, 3);
-    this.addLink(4, 1, 4);
-    // END TEMP
   }
 
   handleNodeMove = (node) => {
