@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import Environment from './Environment.jsx';
 import AddCursor from './AddCursor.jsx';
+import LinkCursor from './LinkCursor.jsx';
 import SceneNode from './SceneNode.jsx';
 import NodeLink from './NodeLink.jsx';
 
@@ -12,6 +13,7 @@ class Scene {
     this.scene = new THREE.Scene();
     this.environment = new Environment(this.scene);
     this.addCursor = new AddCursor(1.0, this.scene);
+    this.linkCursor = new LinkCursor(this.scene);
 
     this.loader = new GLTFLoader();
     this.nodes = [];

@@ -4,10 +4,11 @@ import CursorContext from './CursorContext.jsx';
 import DragContext from './DragContext.jsx';
 
 class Selection {
-  constructor(container, switcher, addCursor, selectionState, onCanUndoDragChanged, onAddClick, onNodeMove) {
+  constructor(container, switcher, addCursor, linkCursor, selectionState, onCanUndoDragChanged, onAddClick, onNodeMove) {
     this.container = container;
     this.switcher = switcher;
     this.addCursor = addCursor;
+    this.linkCursor = linkCursor;
     this.selectionState = selectionState;
 
     this.cursor = new CursorContext(this.container, selectionState)
@@ -44,6 +45,11 @@ class Selection {
   setLinkMode(newLinkMode) {
     if (this.linkMode !== newLinkMode) {
       this.linkMode = newLinkMode;
+      if (this.linkMode) {
+        this.linkCursor.setSource(this.selectionState.selected);
+      } else {
+        this.linkCursor.setTarget(null);
+      }
     }
   }
 
@@ -109,7 +115,7 @@ class Selection {
   };
 
   update(nodes, links) {
-    this.cursor.updateHovered(this.switcher.current, nodes.concat(links));
+    this.cursor.updateHovered(this.switcher.current, nodes.concat(links), this.linkMode ? this.linkCursor : null);
   }
 
   undoLastMove() {

@@ -27,7 +27,7 @@ class CursorContext {
     return false;
   }
 
-  updateHovered(camera, nodesAndLinks) {
+  updateHovered(camera, nodesAndLinks, linkCursor) {
     let objs = [];
     for (const nodeOrLink of nodesAndLinks) {
       objs.push(nodeOrLink.getCollisionObject());
@@ -38,6 +38,17 @@ class CursorContext {
     const nodeOrLink = results.length > 0 ? nodesAndLinks.find(x => x.isParentTo(results[0].object)) : null;
     if (nodeOrLink) {
       this.hoveredPoint.copy(results[0].point);
+      if (linkCursor) {
+        if (nodeOrLink.isSceneNode) {
+          linkCursor.setTarget(nodeOrLink);
+        } else {
+          linkCursor.setTarget(null);
+        }
+      }
+    } else {
+      if (linkCursor) {
+        linkCursor.setTarget(null);
+      }
     }
     this.selectionState.handleHover(nodeOrLink);
   }

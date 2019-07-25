@@ -31,6 +31,7 @@ class Viewport {
       this.container,
       this.switcher,
       this.scene.addCursor,
+      this.scene.linkCursor,
       this.selectionState,
       (canUndo) => this.events.dispatch(this.events.onCanUndoChanged, canUndo),
       (x, y, z) => this.events.dispatch(this.events.onNodeAdd, x, y, z),
