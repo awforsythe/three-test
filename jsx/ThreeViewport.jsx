@@ -50,7 +50,7 @@ class ThreeViewport extends React.Component {
       <React.Fragment>
         <div
           ref={this.setDivRef}
-          style={{ height: '80vh', margin: 8, border: '1px solid #999', position: 'relative' }}
+          style={{ width: '100%', height: '100%', position: 'relative' }}
         >
           <div style={{ position: 'absolute', width: '100%', height: '100%', padding: 4, visibility: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', visibility: 'hidden' }}>

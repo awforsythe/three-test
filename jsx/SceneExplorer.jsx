@@ -150,7 +150,7 @@ class SceneExplorer extends React.Component {
       />
     ) : null);
     return (
-      <React.Fragment>
+      <div style={{ border: '1px solid #ccc', margin: 8, height: '80vh' }}>
         <ThreeViewport
           viewportState={this.state}
           viewportEvents={this.viewportEvents}
@@ -184,7 +184,7 @@ class SceneExplorer extends React.Component {
           onConfirm={this.handleNodeDeleteConfirm}
           onClose={this.handleNodeDeleteClose}
         />
-      </React.Fragment>
+      </div>
     );
   }
 }
