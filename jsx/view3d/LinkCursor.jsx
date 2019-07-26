@@ -72,7 +72,8 @@ class LinkCursor {
   }
 
   _getDisplayPoints(direction, distance) {
-    const insetDistance = Math.min(1.5, distance * 0.333);
+    //const insetDistance = Math.min(1.5, distance * 0.333);
+    const insetDistance = 0.0;
     const inset = new THREE.Vector3().copy(direction).multiplyScalar(insetDistance);
 
     const v0 = new THREE.Vector3().copy(this.srcPosition).add(inset);

@@ -66,7 +66,8 @@ class NodeLink {
   }
 
   _getDisplayPoints(direction, distance) {
-    const insetDistance = Math.min(1.0, distance * 0.333);
+    //const insetDistance = Math.min(1.0, distance * 0.333);
+    const insetDistance = 0.25;
     const inset = new THREE.Vector3().copy(direction).multiplyScalar(insetDistance);
 
     const v0 = new THREE.Vector3().copy(this.srcPosition).add(inset);
