@@ -23,9 +23,9 @@ class Scene {
   handleNodeMove = (node) => {
     for (const link of this.links) {
       if (link.srcNodeHandle === node.handle) {
-        link.setSrcPosition(node.root.position);
+        link.setSrcPosition(node.getLinkPosition());
       } else if (link.dstNodeHandle === node.handle) {
-        link.setDstPosition(node.root.position);
+        link.setDstPosition(node.getLinkPosition());
       }
     }
   };
@@ -58,11 +58,11 @@ class Scene {
 
     const srcNode = this.nodes.find(x => x.handle == srcNodeHandle);
     if (srcNode) {
-      link.setSrcPosition(srcNode.root.position);
+      link.setSrcPosition(srcNode.getLinkPosition());
     }
     const dstNode = this.nodes.find(x => x.handle == dstNodeHandle);
     if (dstNode) {
-      link.setDstPosition(dstNode.root.position);
+      link.setDstPosition(dstNode.getLinkPosition());
     }
 
     return link;

@@ -72,6 +72,15 @@ class SceneNode {
     return this.box;
   }
 
+  getLinkPosition() {
+    if (this.model) {
+      const box = new THREE.Box3().setFromObject(this.model);
+      const center = new THREE.Vector3();
+      return box.getCenter(center);
+    }
+    return this.root.position;
+  }
+
   isParentTo(obj) {
     let parent = obj.parent;
     while (parent) {
@@ -95,6 +104,10 @@ class SceneNode {
     this.root.add(this.model);
 
     this.updateBox();
+
+    if (this.onMove) {
+      this.onMove(this);
+    }
 
     if (this.onModelLoad) {
       this.onModelLoad();

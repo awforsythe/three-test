@@ -26,13 +26,13 @@ class LinkCursor {
 
   setSource(node) {
     if (node) {
-      this.srcPosition.copy(node.root.position);
+      this.srcPosition.copy(node.getLinkPosition());
     }
   }
 
   setTarget(node) {
     if (node) {
-      this.dstPosition.copy(node.root.position);
+      this.dstPosition.copy(node.getLinkPosition());
       this.root.visible = true;
       this._updateMesh();
     } else {
