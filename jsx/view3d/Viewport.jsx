@@ -72,6 +72,8 @@ class Viewport {
       this.hotkeys.unregister();
       this.selection.unregister();
       this.renderer.unregister();
+
+      this.scene.scene.dispose();
     }
   }
 

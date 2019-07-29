@@ -12,6 +12,7 @@ class CameraSwitcher {
       FRUSTUM_SIZE * -0.5,
       1.0, 1000.0,
     );
+    this.persp.position.set(0, 5, 5);
     this.top.position.set(0, 5, 0);
 
     this.type = type;

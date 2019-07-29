@@ -50,6 +50,7 @@ class Renderer {
 
   unregister() {
     this.container.div.removeChild(this.renderer.domElement);
+    this.renderer.dispose();
   }
 
   handleContainerResize = (width, height, aspect) => {

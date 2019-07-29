@@ -123,8 +123,6 @@ class SceneExplorer extends React.Component {
       </div>
     );
 
-    const canAdd = cameraType === 'top';
-    const canLink = selection.type === 'link';
     const addOrLinkButton = selection.type === 'node' ? (
       <ViewportButton
         label={linkMode ? 'CANCEL' : 'LINK'}
