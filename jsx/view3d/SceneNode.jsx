@@ -121,6 +121,7 @@ class SceneNode {
       }
     });
 
+    this.root.updateMatrixWorld();
     this.updateBox();
 
     if (this.onMove) {
