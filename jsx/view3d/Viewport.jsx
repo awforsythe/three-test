@@ -103,6 +103,13 @@ class Viewport {
     if (linkMode !== newState.linkMode) {
       this.selection.setLinkMode(newState.linkMode);
     }
+    if (hotkeysPaused !== newState.hotkeysPaused) {
+      if (newState.hotkeysPaused) {
+        this.hotkeys.pause();
+      } else {
+        this.hotkeys.resume();
+      }
+    }
     this.state = newState;
   }
 

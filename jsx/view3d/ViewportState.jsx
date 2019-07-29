@@ -6,6 +6,7 @@ class ViewportState {
     this.selection = { type: null, handle: null };
     this.addMode = false;
     this.linkMode = false;
+    this.hotkeysPaused = false;
 
     this.onChange = onChange;
   }
@@ -18,6 +19,7 @@ class ViewportState {
       selection: this.selection,
       addMode: this.addMode,
       linkMode: this.linkMode,
+      hotkeysPaused: this.hotkeysPaused,
     };
   }
 
@@ -76,6 +78,20 @@ class ViewportState {
     if (linkMode !== this.linkMode) {
       this.linkMode = linkMode;
       this.onChange({ linkMode: this.linkMode });
+    }
+  };
+
+  pauseHotkeys = () => {
+    if (!this.hotkeysPaused) {
+      this.hotkeysPaused = true;
+      this.onChange({ hotkeysPaused: this.hotkeysPaused });
+    }
+  };
+
+  resumeHotkeys = () => {
+    if (this.hotkeysPaused) {
+      this.hotkeysPaused = false;
+      this.onChange({ hotkeysPaused: this.hotkeysPaused });
     }
   };
 }

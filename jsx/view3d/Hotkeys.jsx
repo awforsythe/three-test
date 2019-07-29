@@ -5,6 +5,7 @@ class Hotkeys {
     for (const keyCode in this.mappings) {
       this.states[keyCode] = false;
     }
+    this.paused = false;
   }
 
   register() {
@@ -17,17 +18,29 @@ class Hotkeys {
     document.removeEventListener('keyup', this.onKeyUp);
   }
 
+  pause() {
+    this.paused = true;
+  }
+
+  resume() {
+    this.paused = false;
+  }
+
   onKeyDown = (event) => {
-    const state = this.states[event.keyCode];
-    if (state !== undefined) {
-      this.handleKeyState(true, event.keyCode);
+    if (!this.paused) {
+      const state = this.states[event.keyCode];
+      if (state !== undefined) {
+        this.handleKeyState(true, event.keyCode);
+      }
     }
   };
 
   onKeyUp = (event) => {
-    const state = this.states[event.keyCode];
-    if (state !== undefined) {
-      this.handleKeyState(false, event.keyCode);
+    if (!this.paused) {
+      const state = this.states[event.keyCode];
+      if (state !== undefined) {
+        this.handleKeyState(false, event.keyCode);
+      }
     }
   };
 
